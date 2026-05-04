@@ -346,6 +346,8 @@ tr:hover td{background:rgba(242,232,208,.4)}
     <div class="nav-sect">Análisis</div>
     <div class="nav-item" onclick="nav('reportes',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Reportes</div>
     <div class="nav-item" onclick="nav('lluvia',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="19" x2="8" y2="21"/><line x1="8" y1="13" x2="8" y2="15"/><line x1="16" y1="19" x2="16" y2="21"/><line x1="16" y1="13" x2="16" y2="15"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="12" y1="15" x2="12" y2="17"/><path d="M20 16.58A5 5 0 0018 7h-1.26A8 8 0 104 15.25"/></svg>Lluvias</div>
+    <div class="nav-item" onclick="nav('suplem',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg>Suplementación</div>
+    <div class="nav-item" onclick="nav('rollos',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="3" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="21"/></svg>Rollos</div>
     <div class="nav-item" onclick="nav('labores',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Labores</div>
     <div class="nav-item" onclick="nav('gasoil',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22V8l9-6 9 6v14"/><path d="M10 22v-6h4v6"/><path d="M15 4v4h4"/></svg>Gasoil</div>
     <div class="nav-sect">Sistema</div>
@@ -866,6 +868,100 @@ tr:hover td{background:rgba(242,232,208,.4)}
   </div>
 </div>
 
+<!-- SUPLEMENTACIÓN -->
+<div class="page" id="p-suplem">
+  <div class="ph">
+    <div><div class="ph-title">Suplementación</div><div class="ph-sub">Maíz, núcleos, rollos y creepfeeding</div></div>
+    <div class="ph-actions"><button class="btn btn-p" onclick="openM('m-suplem')">+ Registrar Suministro</button></div>
+  </div>
+  <div class="stats" id="suplem-stats"></div>
+
+  <!-- Gráfico por producto -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px">
+    <div class="tw">
+      <div class="tw-head"><h3>📦 Por Producto</h3></div>
+      <div style="padding:16px" id="suplem-chart-prod"></div>
+    </div>
+    <div class="tw">
+      <div class="tw-head"><h3>🐄 Por Modalidad</h3></div>
+      <div style="padding:16px" id="suplem-chart-mod"></div>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="tw">
+    <div class="tw-head">
+      <h3>Historial de Suministros</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select id="suplem-f-prod" onchange="renderSuplem()" style="padding:5px 9px;border:1.5px solid var(--wheat);border-radius:6px;font-size:12px;background:var(--paper);outline:none">
+          <option value="">Todos los productos</option>
+          <option value="maiz">Maíz</option>
+          <option value="nucleo">Núcleo</option>
+          <option value="rollo">Rollo</option>
+          <option value="otro">Otro</option>
+        </select>
+        <select id="suplem-f-mod" onchange="renderSuplem()" style="padding:5px 9px;border:1.5px solid var(--wheat);border-radius:6px;font-size:12px;background:var(--paper);outline:none">
+          <option value="">Todas las modalidades</option>
+          <option value="corral">A corral</option>
+          <option value="creepfeeding">Creepfeeding</option>
+          <option value="pastoreo">Pastoreo</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>Fecha</th><th>Producto</th><th>Cantidad</th><th>Modalidad</th><th>Potrero</th><th>Categoría/Tropa</th><th>Costo</th><th>Obs.</th><th></th></tr></thead>
+      <tbody id="suplem-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ROLLOS -->
+<div class="page" id="p-rollos">
+  <div class="ph">
+    <div><div class="ph-title">Rollos</div><div class="ph-sub">Stock, producción y consumo</div></div>
+    <div class="ph-actions">
+      <button class="btn btn-g" style="margin-right:8px" onclick="openM('m-rollo-consumo')">📤 Consumo</button>
+      <button class="btn btn-p" onclick="openM('m-rollo-produccion')">+ Producción</button>
+    </div>
+  </div>
+
+  <!-- Stock por tipo -->
+  <div class="stats" id="rollos-stats"></div>
+  <div id="rollos-alerta" style="display:none;background:rgba(184,60,42,.1);border:2px solid var(--rust);border-radius:10px;padding:14px 18px;margin-bottom:18px;align-items:center;gap:12px">
+    <span style="font-size:24px">⚠️</span>
+    <div id="rollos-alerta-txt"></div>
+  </div>
+
+  <!-- Stock visual por tipo -->
+  <div class="tw" style="margin-bottom:20px">
+    <div class="tw-head"><h3>📊 Stock Actual por Tipo</h3></div>
+    <div style="padding:16px" id="rollos-stock-chart"></div>
+  </div>
+
+  <!-- Tabs producción / consumo -->
+  <div class="tabs">
+    <div class="tab active" onclick="setRollosTab('produccion',this)">🌾 Producción</div>
+    <div class="tab" onclick="setRollosTab('consumo',this)">📤 Consumo</div>
+  </div>
+  <div id="rollos-tab-prod">
+    <div class="tw">
+      <table>
+        <thead><tr><th>Fecha</th><th>Tipo de rollo</th><th>Potrero</th><th>Cantidad</th><th>Obs.</th><th>Registró</th><th></th></tr></thead>
+        <tbody id="rollos-prod-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="rollos-tab-cons" style="display:none">
+    <div class="tw">
+      <table>
+        <thead><tr><th>Fecha</th><th>Tipo de rollo</th><th>Potrero</th><th>Cantidad</th><th>Categoría/Tropa</th><th>Obs.</th><th>Registró</th><th></th></tr></thead>
+        <tbody id="rollos-cons-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <!-- LABORES -->
 <div class="page" id="p-labores">
   <div class="ph">
@@ -1179,6 +1275,112 @@ tr:hover td{background:rgba(242,232,208,.4)}
   </div>
 </div>
 
+<!-- MODAL SUPLEMENTACIÓN -->
+<div class="mb" id="m-suplem">
+  <div class="modal" style="width:540px">
+    <div class="mh"><h3>Registrar Suministro</h3><button class="x-btn" onclick="closeM('m-suplem')">✕</button></div>
+    <div class="mb-body">
+      <div class="fr">
+        <div class="fg"><label>Fecha *</label><input id="sup-fecha" type="date"></div>
+        <div class="fg"><label>Producto *</label>
+          <select id="sup-producto" onchange="toggleSuplemUnidad()">
+            <option value="maiz">Maíz</option>
+            <option value="nucleo">Núcleo</option>
+            <option value="rollo">Rollo</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label id="sup-cant-label">Cantidad (kg) *</label><input id="sup-cantidad" type="number" step="0.1" min="0" placeholder="0"></div>
+        <div class="fg"><label>Modalidad *</label>
+          <select id="sup-modalidad">
+            <option value="corral">A corral</option>
+            <option value="creepfeeding">Creepfeeding</option>
+            <option value="pastoreo">Pastoreo</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Potrero</label><select id="sup-lote"><option value="">Sin especificar</option></select></div>
+        <div class="fg"><label>Categoría / Tropa</label><input id="sup-tropa" placeholder="ej. Vacas preñadas, Terneros…"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Costo ($)</label><input id="sup-costo" type="number" step="0.01" placeholder="Opcional"></div>
+        <div class="fg"><label>Registró</label><input id="sup-operario" placeholder="Nombre"></div>
+      </div>
+      <div class="fg"><label>Observaciones</label><input id="sup-obs" placeholder="Notas adicionales…"></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-g" onclick="closeM('m-suplem')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveSuplem()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ROLLO PRODUCCIÓN -->
+<div class="mb" id="m-rollo-produccion">
+  <div class="modal">
+    <div class="mh"><h3>Registrar Producción de Rollos</h3><button class="x-btn" onclick="closeM('m-rollo-produccion')">✕</button></div>
+    <div class="mb-body">
+      <div class="fr">
+        <div class="fg"><label>Fecha *</label><input id="rp-fecha" type="date"></div>
+        <div class="fg"><label>Tipo de rollo *</label>
+          <select id="rp-tipo">
+            <option value="pastura">Pastura</option>
+            <option value="verdeo">Verdeo</option>
+            <option value="avena">Avena</option>
+            <option value="rye grass">Rye grass</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Potrero *</label><select id="rp-lote"><option value="">Sin especificar</option></select></div>
+        <div class="fg"><label>Cantidad de rollos *</label><input id="rp-cantidad" type="number" min="1" placeholder="ej. 50"></div>
+      </div>
+      <div class="fg"><label>Peso promedio por rollo (kg)</label><input id="rp-peso" type="number" placeholder="Opcional, ej. 500"></div>
+      <div class="fg"><label>Observaciones</label><input id="rp-obs" placeholder="Calidad, condiciones…"></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-g" onclick="closeM('m-rollo-produccion')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveRolloProduccion()">Guardar Producción</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ROLLO CONSUMO -->
+<div class="mb" id="m-rollo-consumo">
+  <div class="modal">
+    <div class="mh"><h3>Registrar Consumo de Rollos</h3><button class="x-btn" onclick="closeM('m-rollo-consumo')">✕</button></div>
+    <div class="mb-body">
+      <div class="fr">
+        <div class="fg"><label>Fecha *</label><input id="rc-fecha" type="date"></div>
+        <div class="fg"><label>Tipo de rollo *</label>
+          <select id="rc-tipo">
+            <option value="pastura">Pastura</option>
+            <option value="verdeo">Verdeo</option>
+            <option value="avena">Avena</option>
+            <option value="rye grass">Rye grass</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Potrero donde se usó</label><select id="rc-lote"><option value="">Sin especificar</option></select></div>
+        <div class="fg"><label>Cantidad *</label><input id="rc-cantidad" type="number" min="1" placeholder="ej. 10"></div>
+      </div>
+      <div class="fg"><label>Categoría / Tropa</label><input id="rc-tropa" placeholder="ej. Vacas preñadas, Terneros…"></div>
+      <div class="fg"><label>Observaciones</label><input id="rc-obs" placeholder="Notas…"></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-g" onclick="closeM('m-rollo-consumo')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveRolloConsumo()">Guardar Consumo</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL LABOR -->
 <div class="mb" id="m-labor">
   <div class="modal">
@@ -1469,12 +1671,12 @@ const USE_JSONBIN = JSONBIN_ID !== 'TU_BIN_ID_AQUI'
 
 const DB_LOCAL_KEY = 'gc_lasnenas_2026'  // cache local para modo offline
 
-let DB = {animales:[],lotes:LOTES_SHAPE.map(l=>({...l})),ingresos:[],egresos:[],actlog:[],lluvias:[],tropas:[],labores:[],gasoil:[],gasoilConfig:{minimo:500},madres:[],sanidades:[],partos:[]}
+let DB = {animales:[],lotes:LOTES_SHAPE.map(l=>({...l})),ingresos:[],egresos:[],actlog:[],lluvias:[],tropas:[],labores:[],gasoil:[],gasoilConfig:{minimo:500},madres:[],sanidades:[],partos:[],suplementos:[],rollosProduccion:[],rollosConsumo:[]}
 let syncStatus = 'local'  // 'local' | 'syncing' | 'ok' | 'error'
 let syncDebounce = null
 
 function dbEmpty(){
-  return{animales:[],lotes:LOTES_SHAPE.map(l=>({...l})),ingresos:[],egresos:[],actlog:[],lluvias:[],tropas:[],labores:[],gasoil:[],gasoilConfig:{minimo:500},madres:[],sanidades:[],partos:[]}
+  return{animales:[],lotes:LOTES_SHAPE.map(l=>({...l})),ingresos:[],egresos:[],actlog:[],lluvias:[],tropas:[],labores:[],gasoil:[],gasoilConfig:{minimo:500},madres:[],sanidades:[],partos:[],suplementos:[],rollosProduccion:[],rollosConsumo:[]}
 }
 
 // Cargar desde JSONBin (o localStorage como fallback)
@@ -1529,6 +1731,9 @@ function mergeLocalRemote(local,remote){
     madres:   winner(local.madres||[],remote.madres||[]),
     sanidades:winner(local.sanidades||[],remote.sanidades||[]),
     partos:   winner(local.partos||[],remote.partos||[]),
+    suplementos:     winner(local.suplementos||[],remote.suplementos||[]),
+    rollosProduccion:winner(local.rollosProduccion||[],remote.rollosProduccion||[]),
+    rollosConsumo:   winner(local.rollosConsumo||[],remote.rollosConsumo||[]),
   }
 }
 
@@ -1701,6 +1906,16 @@ function openM(id){
   if(f&&!f.value)f.value=today()
   if(id==='m-animal')populateLoteSelect()
   if(id==='m-ing'){toggleIngFields()}
+  if(id==='m-suplem'){
+    const loteOpts='<option value="">Sin especificar</option>'+DB.lotes.map(l=>`<option value="${l.id}">${l.nombre}</option>`).join('')
+    document.getElementById('sup-lote').innerHTML=loteOpts
+    toggleSuplemUnidad()
+  }
+  if(id==='m-rollo-produccion'||id==='m-rollo-consumo'){
+    const loteOpts='<option value="">Sin especificar</option>'+DB.lotes.map(l=>`<option value="${l.id}">${l.nombre}</option>`).join('')
+    const loteSel=id==='m-rollo-produccion'?'rp-lote':'rc-lote'
+    document.getElementById(loteSel).innerHTML=loteOpts
+  }
   if(id==='m-madre'){
     document.getElementById('m-madre-title').textContent='Agregar Madre'
     document.getElementById('mad-id').value=''
@@ -3290,6 +3505,247 @@ function renderLabores(){
 }
 
 // ══════════════════════════════════════════════════
+// SUPLEMENTACIÓN
+// ══════════════════════════════════════════════════
+const SUPLEM_PROD_LABEL={maiz:'Maíz',nucleo:'Núcleo',rollo:'Rollo',otro:'Otro'}
+const SUPLEM_PROD_BADGE={maiz:'b-gold',nucleo:'b-sky',rollo:'b-green',otro:'b-bark'}
+const SUPLEM_MOD_LABEL={corral:'A corral',creepfeeding:'Creepfeeding',pastoreo:'Pastoreo',otro:'Otro'}
+const SUPLEM_PROD_UNIT={maiz:'kg',nucleo:'kg',rollo:'rollos',otro:'unidad'}
+
+function toggleSuplemUnidad(){
+  const prod=document.getElementById('sup-producto').value
+  const lbl=document.getElementById('sup-cant-label')
+  if(lbl)lbl.textContent=prod==='rollo'?'Cantidad (rollos) *':'Cantidad (kg) *'
+}
+
+function saveSuplem(){
+  if(!DB.suplementos)DB.suplementos=[]
+  const fecha=document.getElementById('sup-fecha').value
+  const cantidad=parseFloat(document.getElementById('sup-cantidad').value)||0
+  if(!fecha||cantidad<=0){alert('Completá fecha y cantidad.');return}
+  DB.suplementos.push({id:uid(),fecha,
+    producto:document.getElementById('sup-producto').value,
+    cantidad,
+    modalidad:document.getElementById('sup-modalidad').value,
+    loteId:document.getElementById('sup-lote').value,
+    tropa:document.getElementById('sup-tropa').value.trim(),
+    costo:parseFloat(document.getElementById('sup-costo').value)||0,
+    operario:document.getElementById('sup-operario').value.trim(),
+    obs:document.getElementById('sup-obs').value.trim(),
+    uid:currentUser.id,uname:currentUser.name
+  })
+  dbSave(DB);closeM('m-suplem')
+  clr('sup-cantidad','sup-tropa','sup-costo','sup-obs','sup-operario')
+  logActivity('Suplementación',`${SUPLEM_PROD_LABEL[document.getElementById('sup-producto')?.value||'']} — ${cantidad}`)
+  render();toast('Suministro registrado','🌽')
+}
+
+function delSuplem(id){
+  if(!confirm('¿Eliminar este registro?'))return
+  DB.suplementos=DB.suplementos.filter(s=>s.id!==id);dbSave(DB);render()
+}
+
+function renderSuplem(){
+  if(!DB.suplementos)DB.suplementos=[]
+  const loteMap=Object.fromEntries(DB.lotes.map(l=>[l.id,l.nombre]))
+  const prodF=(document.getElementById('suplem-f-prod')||{value:''}).value
+  const modF=(document.getElementById('suplem-f-mod')||{value:''}).value
+
+  // Stats
+  const el=document.getElementById('suplem-stats');if(!el)return
+  const totalKg=DB.suplementos.filter(s=>s.producto!=='rollo').reduce((a,s)=>a+s.cantidad,0)
+  const totalRollos=DB.suplementos.filter(s=>s.producto==='rollo').reduce((a,s)=>a+s.cantidad,0)
+  const costoTotal=DB.suplementos.reduce((a,s)=>a+(s.costo||0),0)
+  const eventos=DB.suplementos.length
+  el.innerHTML=`
+    <div class="sc"><span class="sc-icon">🌽</span><div class="sc-label">Total suministrado</div><div class="sc-value g">${totalKg.toFixed(0)}</div><div class="sc-sub">kg (maíz + núcleo)</div></div>
+    <div class="sc"><span class="sc-icon">🌾</span><div class="sc-label">Rollos usados</div><div class="sc-value o">${totalRollos.toFixed(0)}</div><div class="sc-sub">rollos suministrados</div></div>
+    <div class="sc"><span class="sc-icon">💰</span><div class="sc-label">Costo total</div><div class="sc-value" style="font-size:18px">${$m(costoTotal)}</div></div>
+    <div class="sc"><span class="sc-icon">📋</span><div class="sc-label">Eventos</div><div class="sc-value">${eventos}</div></div>`
+
+  // Gráfico por producto
+  const byProd={}
+  DB.suplementos.forEach(s=>{byProd[s.producto]=(byProd[s.producto]||0)+s.cantidad})
+  const chartProd=document.getElementById('suplem-chart-prod');if(!chartProd)return
+  const maxP=Math.max(...Object.values(byProd),1)
+  chartProd.innerHTML=Object.entries(byProd).map(([k,v])=>`
+    <div class="bar-row">
+      <div class="bar-label"><span>${SUPLEM_PROD_LABEL[k]||k}</span><span style="color:var(--gold)">${v.toFixed(0)} ${SUPLEM_PROD_UNIT[k]||''}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(v/maxP*100).toFixed(0)}%;background:var(--gold)"></div></div>
+    </div>`).join('') || '<div style="color:var(--hide);font-size:12px">Sin datos</div>'
+
+  // Gráfico por modalidad
+  const byMod={}
+  DB.suplementos.forEach(s=>{byMod[s.modalidad]=(byMod[s.modalidad]||0)+1})
+  const chartMod=document.getElementById('suplem-chart-mod');if(!chartMod)return
+  const maxM=Math.max(...Object.values(byMod),1)
+  chartMod.innerHTML=Object.entries(byMod).map(([k,v])=>`
+    <div class="bar-row">
+      <div class="bar-label"><span>${SUPLEM_MOD_LABEL[k]||k}</span><span style="color:var(--sky)">${v} eventos</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(v/maxM*100).toFixed(0)}%;background:var(--sky)"></div></div>
+    </div>`).join('') || '<div style="color:var(--hide);font-size:12px">Sin datos</div>'
+
+  // Tabla
+  let data=[...DB.suplementos].sort((a,b)=>b.fecha.localeCompare(a.fecha))
+  if(prodF)data=data.filter(s=>s.producto===prodF)
+  if(modF)data=data.filter(s=>s.modalidad===modF)
+  const tb=document.getElementById('suplem-tbody');if(!tb)return
+  tb.innerHTML=data.length?data.map(s=>`
+    <tr>
+      <td>${$fd(s.fecha)}</td>
+      <td><span class="badge ${SUPLEM_PROD_BADGE[s.producto]||'b-bark'}">${SUPLEM_PROD_LABEL[s.producto]||s.producto}</span></td>
+      <td style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700">${s.cantidad} <span style="font-size:12px;color:var(--hide)">${SUPLEM_PROD_UNIT[s.producto]||''}</span></td>
+      <td><span class="badge b-bark">${SUPLEM_MOD_LABEL[s.modalidad]||s.modalidad}</span></td>
+      <td>${s.loteId?loteMap[s.loteId]||'-':'-'}</td>
+      <td style="font-size:12px;color:var(--hide)">${s.tropa||'-'}</td>
+      <td>${s.costo>0?$m(s.costo):'-'}</td>
+      <td style="font-size:11px;color:var(--hide)">${s.obs||'-'}</td>
+      <td><button class="icon-btn" onclick="delSuplem('${s.id}')">🗑</button></td>
+    </tr>`).join('')
+  :'<tr class="empty-row"><td colspan="9">Sin suministros registrados</td></tr>'
+}
+
+// ══════════════════════════════════════════════════
+// ROLLOS
+// ══════════════════════════════════════════════════
+const ROLLO_TIPO_LABEL={pastura:'Pastura',verdeo:'Verdeo',avena:'Avena','rye grass':'Rye grass',otro:'Otro'}
+const ROLLO_TIPO_COLOR={pastura:'var(--green)',verdeo:'#A8D45A',avena:'#C8B84A','rye grass':'#7EC878',otro:'var(--hide)'}
+const ROLLO_ALERTA_MIN=20  // alerta si menos de 20 rollos de cualquier tipo
+let rollosTab='produccion'
+
+function setRollosTab(t,el){
+  rollosTab=t
+  document.querySelectorAll('#p-rollos .tab').forEach(x=>x.classList.remove('active'))
+  el.classList.add('active')
+  document.getElementById('rollos-tab-prod').style.display=t==='produccion'?'block':'none'
+  document.getElementById('rollos-tab-cons').style.display=t==='consumo'?'block':'none'
+}
+
+function saveRolloProduccion(){
+  if(!DB.rollosProduccion)DB.rollosProduccion=[]
+  const fecha=document.getElementById('rp-fecha').value
+  const cant=parseInt(document.getElementById('rp-cantidad').value)||0
+  if(!fecha||cant<=0){alert('Completá fecha y cantidad.');return}
+  DB.rollosProduccion.push({id:uid(),fecha,
+    tipo:document.getElementById('rp-tipo').value,
+    loteId:document.getElementById('rp-lote').value,
+    cantidad:cant,
+    peso:parseFloat(document.getElementById('rp-peso').value)||0,
+    obs:document.getElementById('rp-obs').value.trim(),
+    uid:currentUser.id,uname:currentUser.name
+  })
+  dbSave(DB);closeM('m-rollo-produccion')
+  clr('rp-cantidad','rp-peso','rp-obs')
+  logActivity('Rollos producidos',`${cant} rollos`)
+  render();toast(`${cant} rollos registrados`,'🌾')
+}
+
+function saveRolloConsumo(){
+  if(!DB.rollosConsumo)DB.rollosConsumo=[]
+  const fecha=document.getElementById('rc-fecha').value
+  const cant=parseInt(document.getElementById('rc-cantidad').value)||0
+  if(!fecha||cant<=0){alert('Completá fecha y cantidad.');return}
+  DB.rollosConsumo.push({id:uid(),fecha,
+    tipo:document.getElementById('rc-tipo').value,
+    loteId:document.getElementById('rc-lote').value,
+    cantidad:cant,
+    tropa:document.getElementById('rc-tropa').value.trim(),
+    obs:document.getElementById('rc-obs').value.trim(),
+    uid:currentUser.id,uname:currentUser.name
+  })
+  dbSave(DB);closeM('m-rollo-consumo')
+  clr('rc-cantidad','rc-tropa','rc-obs')
+  logActivity('Rollos consumidos',`${cant} rollos`)
+  render();toast(`${cant} rollos de consumo registrados`,'📤')
+}
+
+function delRollo(id,tipo){
+  if(!confirm('¿Eliminar este registro?'))return
+  if(tipo==='prod')DB.rollosProduccion=DB.rollosProduccion.filter(r=>r.id!==id)
+  else DB.rollosConsumo=DB.rollosConsumo.filter(r=>r.id!==id)
+  dbSave(DB);render()
+}
+
+function renderRollos(){
+  if(!DB.rollosProduccion)DB.rollosProduccion=[]
+  if(!DB.rollosConsumo)DB.rollosConsumo=[]
+  const loteMap=Object.fromEntries(DB.lotes.map(l=>[l.id,l.nombre]))
+
+  // Stock por tipo = producción - consumo
+  const tipos=['pastura','verdeo','avena','rye grass','otro']
+  const stock={}
+  tipos.forEach(t=>{
+    const prod=DB.rollosProduccion.filter(r=>r.tipo===t).reduce((a,r)=>a+r.cantidad,0)
+    const cons=DB.rollosConsumo.filter(r=>r.tipo===t).reduce((a,r)=>a+r.cantidad,0)
+    stock[t]=prod-cons
+  })
+  const totalProd=DB.rollosProduccion.reduce((a,r)=>a+r.cantidad,0)
+  const totalCons=DB.rollosConsumo.reduce((a,r)=>a+r.cantidad,0)
+  const totalStock=Object.values(stock).reduce((a,v)=>a+v,0)
+
+  // Stats
+  const el=document.getElementById('rollos-stats');if(!el)return
+  el.innerHTML=`
+    <div class="sc"><span class="sc-icon">🌾</span><div class="sc-label">Stock total</div><div class="sc-value g">${totalStock}</div><div class="sc-sub">rollos disponibles</div></div>
+    <div class="sc"><span class="sc-icon">📥</span><div class="sc-label">Producidos</div><div class="sc-value">${totalProd}</div><div class="sc-sub">total acumulado</div></div>
+    <div class="sc"><span class="sc-icon">📤</span><div class="sc-label">Consumidos</div><div class="sc-value o">${totalCons}</div><div class="sc-sub">total acumulado</div></div>`
+
+  // Alerta stock bajo
+  const bajos=tipos.filter(t=>stock[t]>0&&stock[t]<ROLLO_ALERTA_MIN)
+  const alertaEl=document.getElementById('rollos-alerta')
+  if(alertaEl){
+    alertaEl.style.display=bajos.length?'flex':'none'
+    if(bajos.length){
+      document.getElementById('rollos-alerta-txt').innerHTML=
+        `<strong style="color:var(--rust)">Stock bajo en:</strong> ${bajos.map(t=>`${ROLLO_TIPO_LABEL[t]}: ${stock[t]} rollos`).join(' · ')}`
+    }
+  }
+
+  // Gráfico stock por tipo
+  const chartEl=document.getElementById('rollos-stock-chart');if(!chartEl)return
+  const maxS=Math.max(...Object.values(stock),1)
+  chartEl.innerHTML=tipos.filter(t=>stock[t]!==0||DB.rollosProduccion.some(r=>r.tipo===t)).map(t=>`
+    <div class="bar-row">
+      <div class="bar-label">
+        <span style="font-weight:600">${ROLLO_TIPO_LABEL[t]}</span>
+        <span style="color:${stock[t]<ROLLO_ALERTA_MIN&&stock[t]>0?'var(--rust)':ROLLO_TIPO_COLOR[t]};font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700">${stock[t]}</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.max(0,stock[t]/maxS*100).toFixed(0)}%;background:${ROLLO_TIPO_COLOR[t]}"></div></div>
+    </div>`).join('') || '<div style="color:var(--hide);font-size:12px">Sin rollos registrados</div>'
+
+  // Tabla producción
+  const tbProd=document.getElementById('rollos-prod-tbody');if(!tbProd)return
+  const dataProd=[...DB.rollosProduccion].sort((a,b)=>b.fecha.localeCompare(a.fecha))
+  tbProd.innerHTML=dataProd.length?dataProd.map(r=>`
+    <tr>
+      <td>${$fd(r.fecha)}</td>
+      <td><span class="badge b-green">${ROLLO_TIPO_LABEL[r.tipo]||r.tipo}</span></td>
+      <td>${r.loteId?loteMap[r.loteId]||'-':'-'}</td>
+      <td style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--green)">${r.cantidad}</td>
+      <td style="font-size:11px;color:var(--hide)">${r.obs||'-'}</td>
+      <td style="font-size:11px;color:var(--hide)">${r.uname||'-'}</td>
+      <td><button class="icon-btn" onclick="delRollo('${r.id}','prod')">🗑</button></td>
+    </tr>`).join('')
+  :'<tr class="empty-row"><td colspan="7">Sin producción registrada</td></tr>'
+
+  // Tabla consumo
+  const tbCons=document.getElementById('rollos-cons-tbody');if(!tbCons)return
+  const dataCons=[...DB.rollosConsumo].sort((a,b)=>b.fecha.localeCompare(a.fecha))
+  tbCons.innerHTML=dataCons.length?dataCons.map(r=>`
+    <tr>
+      <td>${$fd(r.fecha)}</td>
+      <td><span class="badge b-gold">${ROLLO_TIPO_LABEL[r.tipo]||r.tipo}</span></td>
+      <td>${r.loteId?loteMap[r.loteId]||'-':'-'}</td>
+      <td style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--rust)">${r.cantidad}</td>
+      <td style="font-size:12px;color:var(--hide)">${r.tropa||'-'}</td>
+      <td style="font-size:11px;color:var(--hide)">${r.obs||'-'}</td>
+      <td style="font-size:11px;color:var(--hide)">${r.uname||'-'}</td>
+      <td><button class="icon-btn" onclick="delRollo('${r.id}','cons')">🗑</button></td>
+    </tr>`).join('')
+  :'<tr class="empty-row"><td colspan="8">Sin consumo registrado</td></tr>'
+}
+
+// ══════════════════════════════════════════════════
 // RODEO DE CRÍA
 // ══════════════════════════════════════════════════
 const SAN_LABEL={vacuna:'Vacuna',antiparasitario:'Antiparasitario',vitamina:'Vitamina',antibiotico:'Antibiótico',otro:'Otro'}
@@ -3681,7 +4137,7 @@ function renderGasoil(){
 }
 
 function render(){
-  const fns=[renderDashboard,renderStock,renderIngresos,renderEgresos,renderReportes,renderLoteGrid,renderMapLotes,renderUsuarios,renderLluvia,renderTropas,renderLabores,renderGasoil,renderCria]
+  const fns=[renderDashboard,renderStock,renderIngresos,renderEgresos,renderReportes,renderLoteGrid,renderMapLotes,renderUsuarios,renderLluvia,renderTropas,renderLabores,renderGasoil,renderCria,renderSuplem,renderRollos]
   fns.forEach(fn=>{try{fn()}catch(e){console.error(fn.name+' failed:',e)}})
 }
 </script>
