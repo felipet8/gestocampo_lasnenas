@@ -335,6 +335,7 @@ tr:hover td{background:rgba(242,232,208,.4)}
     <div class="nav-sect">Campo</div>
     <div class="nav-item" onclick="nav('campo',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>Plano del Campo</div>
     <div class="nav-sect">Hacienda</div>
+    <div class="nav-item" onclick="nav('cria',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Rodeo de Cría</div>
     <div class="nav-item" onclick="nav('tropas',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Tropas</div>
     <div class="nav-item" onclick="nav('stock',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Stock Bovino</div>
     <div class="nav-item" onclick="nav('masiva',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Carga Masiva</div>
@@ -442,6 +443,83 @@ tr:hover td{background:rgba(242,232,208,.4)}
     <div class="tw">
       <div class="tw-head"><h3 id="ld-title">Detalle del Lote</h3><button class="btn btn-g btn-sm" onclick="closeLoteDetail()">Cerrar</button></div>
       <div style="padding:16px" id="ld-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- RODEO CRÍA -->
+<div class="page" id="p-cria">
+  <div class="ph">
+    <div><div class="ph-title">Rodeo de Cría</div><div class="ph-sub">Madres, sanidad y partos</div></div>
+    <div class="ph-actions">
+      <button class="btn btn-g" style="margin-right:8px" onclick="openM('m-sanidad')">💉 Registrar Sanidad</button>
+      <button class="btn btn-p" onclick="openM('m-madre')">+ Agregar Madre</button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" onclick="setCriaTab('madres',this)">🐄 Madres ({{n_madres}})</div>
+    <div class="tab" onclick="setCriaTab('sanidad',this)">💉 Sanidad</div>
+    <div class="tab" onclick="setCriaTab('partos',this)">🐣 Partos</div>
+  </div>
+
+  <!-- TAB MADRES -->
+  <div id="cria-tab-madres">
+    <div class="stats" id="cria-stats"></div>
+    <div class="filter-bar">
+      <input type="text" id="cria-search" placeholder="Buscar caravana…" oninput="renderCria()">
+      <select id="cria-estado-f" onchange="renderCria()">
+        <option value="">Todos los estados</option>
+        <option value="preñada">Preñada</option>
+        <option value="parida">Parida</option>
+        <option value="vacia">Vacía</option>
+        <option value="vendida">Vendida</option>
+      </select>
+      <select id="cria-lote-f" onchange="renderCria()">
+        <option value="">Todos los potreros</option>
+      </select>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Caravana</th><th>Categoría</th><th>Raza</th><th>Estado</th><th>Potrero</th><th>Última sanidad</th><th>Partos</th><th>Acciones</th></tr></thead>
+        <tbody id="cria-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB SANIDAD -->
+  <div id="cria-tab-sanidad" style="display:none">
+    <div class="filter-bar">
+      <select id="san-tipo-f" onchange="renderSanidad()">
+        <option value="">Todos los tipos</option>
+        <option value="vacuna">Vacuna</option>
+        <option value="antiparasitario">Antiparasitario</option>
+        <option value="vitamina">Vitamina</option>
+        <option value="antibiotico">Antibiótico</option>
+        <option value="otro">Otro</option>
+      </select>
+      <select id="san-lote-f" onchange="renderSanidad()">
+        <option value="">Todos los potreros</option>
+      </select>
+    </div>
+    <div class="stats" id="san-stats"></div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th>Dosis</th><th>Potreros</th><th>Animales</th><th>Costo</th><th>Aplicó</th><th></th></tr></thead>
+        <tbody id="san-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB PARTOS -->
+  <div id="cria-tab-partos" style="display:none">
+    <div class="stats" id="partos-stats"></div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Fecha</th><th>Madre</th><th>Cría caravana</th><th>Sexo</th><th>Peso nacer</th><th>Estado cría</th><th>Potrero</th><th>Obs.</th><th></th></tr></thead>
+        <tbody id="partos-tbody"></tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -976,6 +1054,131 @@ tr:hover td{background:rgba(242,232,208,.4)}
 
 <div class="toast-wrap" id="toasts"></div>
 
+<!-- MODAL MADRE -->
+<div class="mb" id="m-madre">
+  <div class="modal">
+    <div class="mh"><h3 id="m-madre-title">Agregar Madre</h3><button class="x-btn" onclick="closeM('m-madre')">✕</button></div>
+    <div class="mb-body">
+      <div class="fr">
+        <div class="fg"><label>N° Caravana *</label><input id="mad-caravana" placeholder="ej. 1234"></div>
+        <div class="fg"><label>Categoría</label>
+          <select id="mad-cat">
+            <option value="Vaca">Vaca</option>
+            <option value="Vaquillona">Vaquillona</option>
+          </select>
+        </div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Raza</label><input id="mad-raza" placeholder="ej. Angus, Hereford…"></div>
+        <div class="fg"><label>Estado reproductivo</label>
+          <select id="mad-estado">
+            <option value="preñada">Preñada</option>
+            <option value="parida">Parida</option>
+            <option value="vacia">Vacía</option>
+            <option value="vendida">Vendida</option>
+          </select>
+        </div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Potrero actual</label><select id="mad-lote"><option value="">Sin potrero</option></select></div>
+        <div class="fg"><label>Fecha de ingreso</label><input id="mad-fecha" type="date"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Peso (kg)</label><input id="mad-peso" type="number" placeholder="Opcional"></div>
+        <div class="fg"><label>Origen</label>
+          <select id="mad-origen"><option value="propio">Propio</option><option value="capitalizacion">Capitalización</option></select>
+        </div>
+      </div>
+      <div class="fg"><label>Observaciones</label><textarea id="mad-obs" rows="2" placeholder="Notas adicionales…"></textarea></div>
+      <input type="hidden" id="mad-id">
+    </div>
+    <div class="mf">
+      <button class="btn btn-g" onclick="closeM('m-madre')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveMadre()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SANIDAD -->
+<div class="mb" id="m-sanidad">
+  <div class="modal" style="width:560px">
+    <div class="mh"><h3>Registrar Evento de Sanidad</h3><button class="x-btn" onclick="closeM('m-sanidad')">✕</button></div>
+    <div class="mb-body">
+      <div class="fr">
+        <div class="fg"><label>Fecha *</label><input id="san-fecha" type="date"></div>
+        <div class="fg"><label>Tipo *</label>
+          <select id="san-tipo">
+            <option value="vacuna">Vacuna</option>
+            <option value="antiparasitario">Antiparasitario</option>
+            <option value="vitamina">Vitamina</option>
+            <option value="antibiotico">Antibiótico</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Producto / Insumo *</label><input id="san-producto" placeholder="ej. Ivermectina, Brucelosis…"></div>
+        <div class="fg"><label>Dosis</label><input id="san-dosis" placeholder="ej. 1ml/50kg, 5ml"></div>
+      </div>
+      <div class="fg"><label>Potreros involucrados</label>
+        <select id="san-lotes" multiple style="height:90px">
+        </select>
+        <div style="font-size:11px;color:var(--hide);margin-top:3px">Ctrl/Cmd para seleccionar varios</div>
+      </div>
+      <div class="fg"><label>Animales tratados (caravanas, opcional)</label>
+        <textarea id="san-animales" rows="2" placeholder="ej. 1234, 5678, 9012 — o dejá vacío si fue todo el rodeo"></textarea>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Costo total ($)</label><input id="san-costo" type="number" step="0.01" placeholder="Opcional"></div>
+        <div class="fg"><label>Veterinario / Operario</label><input id="san-operario" placeholder="Nombre"></div>
+      </div>
+      <div class="fg"><label>Observaciones</label><input id="san-obs" placeholder="Reacciones, condiciones, notas…"></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-g" onclick="closeM('m-sanidad')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveSanidad()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PARTO -->
+<div class="mb" id="m-parto">
+  <div class="modal">
+    <div class="mh"><h3>Registrar Parto</h3><button class="x-btn" onclick="closeM('m-parto')">✕</button></div>
+    <div class="mb-body">
+      <div class="fr">
+        <div class="fg"><label>Fecha del parto *</label><input id="par-fecha" type="date"></div>
+        <div class="fg"><label>Madre (caravana) *</label><select id="par-madre"><option value="">Seleccionar…</option></select></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>N° Caravana de la cría</label><input id="par-cria-car" placeholder="ej. 5678"></div>
+        <div class="fg"><label>Sexo</label>
+          <select id="par-sexo">
+            <option value="macho">Macho (ternero)</option>
+            <option value="hembra">Hembra (ternera)</option>
+          </select>
+        </div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Peso al nacer (kg)</label><input id="par-peso" type="number" placeholder="Opcional"></div>
+        <div class="fg"><label>Estado de la cría</label>
+          <select id="par-estado-cria">
+            <option value="vivo">Vivo/a</option>
+            <option value="muerto">Muerto/a</option>
+            <option value="vendido">Vendido/a</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label>Potrero de nacimiento</label><select id="par-lote"><option value="">Sin especificar</option></select></div>
+      <div class="fg"><label>Observaciones</label><textarea id="par-obs" rows="2" placeholder="Parto distócico, mellizos, notas…"></textarea></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-g" onclick="closeM('m-parto')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveParto()">Guardar Parto</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL LABOR -->
 <div class="mb" id="m-labor">
   <div class="modal">
@@ -1266,12 +1469,12 @@ const USE_JSONBIN = JSONBIN_ID !== 'TU_BIN_ID_AQUI'
 
 const DB_LOCAL_KEY = 'gc_lasnenas_2026'  // cache local para modo offline
 
-let DB = {animales:[],lotes:LOTES_SHAPE.map(l=>({...l})),ingresos:[],egresos:[],actlog:[],lluvias:[],tropas:[],labores:[],gasoil:[],gasoilConfig:{minimo:500}}
+let DB = {animales:[],lotes:LOTES_SHAPE.map(l=>({...l})),ingresos:[],egresos:[],actlog:[],lluvias:[],tropas:[],labores:[],gasoil:[],gasoilConfig:{minimo:500},madres:[],sanidades:[],partos:[]}
 let syncStatus = 'local'  // 'local' | 'syncing' | 'ok' | 'error'
 let syncDebounce = null
 
 function dbEmpty(){
-  return{animales:[],lotes:LOTES_SHAPE.map(l=>({...l})),ingresos:[],egresos:[],actlog:[],lluvias:[],tropas:[],labores:[],gasoil:[],gasoilConfig:{minimo:500}}
+  return{animales:[],lotes:LOTES_SHAPE.map(l=>({...l})),ingresos:[],egresos:[],actlog:[],lluvias:[],tropas:[],labores:[],gasoil:[],gasoilConfig:{minimo:500},madres:[],sanidades:[],partos:[]}
 }
 
 // Cargar desde JSONBin (o localStorage como fallback)
@@ -1323,6 +1526,9 @@ function mergeLocalRemote(local,remote){
     labores:  winner(local.labores||[],remote.labores||[]),
     gasoil:   winner(local.gasoil||[],remote.gasoil||[]),
     gasoilConfig: local.gasoilConfig||remote.gasoilConfig||{minimo:500},
+    madres:   winner(local.madres||[],remote.madres||[]),
+    sanidades:winner(local.sanidades||[],remote.sanidades||[]),
+    partos:   winner(local.partos||[],remote.partos||[]),
   }
 }
 
@@ -1495,6 +1701,21 @@ function openM(id){
   if(f&&!f.value)f.value=today()
   if(id==='m-animal')populateLoteSelect()
   if(id==='m-ing'){toggleIngFields()}
+  if(id==='m-madre'){
+    document.getElementById('m-madre-title').textContent='Agregar Madre'
+    document.getElementById('mad-id').value=''
+    const loteOpts='<option value="">Sin potrero</option>'+DB.lotes.map(l=>`<option value="${l.id}">${l.nombre}</option>`).join('')
+    document.getElementById('mad-lote').innerHTML=loteOpts
+  }
+  if(id==='m-sanidad'){
+    const ml=document.getElementById('san-lotes')
+    if(ml)ml.innerHTML=DB.lotes.map(l=>`<option value="${l.id}">${l.nombre}</option>`).join('')
+  }
+  if(id==='m-parto'){
+    populateMadreSelect()
+    const loteOpts='<option value="">Sin especificar</option>'+DB.lotes.map(l=>`<option value="${l.id}">${l.nombre}</option>`).join('')
+    document.getElementById('par-lote').innerHTML=loteOpts
+  }
   if(id==='m-labor'){populateLaborLote()}
   if(id==='m-gasoil-config'){const el=document.getElementById('gs-minimo');if(el)el.value=DB.gasoilConfig?.minimo||500}
   if(id==='m-lluvia'){populateLluviaLote()}
@@ -3069,6 +3290,283 @@ function renderLabores(){
 }
 
 // ══════════════════════════════════════════════════
+// RODEO DE CRÍA
+// ══════════════════════════════════════════════════
+const SAN_LABEL={vacuna:'Vacuna',antiparasitario:'Antiparasitario',vitamina:'Vitamina',antibiotico:'Antibiótico',otro:'Otro'}
+const SAN_BADGE={vacuna:'b-sky',antiparasitario:'b-green',vitamina:'b-gold',antibiotico:'b-red',otro:'b-bark'}
+let criaTab='madres'
+
+function setCriaTab(t,el){
+  criaTab=t
+  document.querySelectorAll('#p-cria .tab').forEach(x=>x.classList.remove('active'))
+  el.classList.add('active')
+  document.getElementById('cria-tab-madres').style.display=t==='madres'?'block':'none'
+  document.getElementById('cria-tab-sanidad').style.display=t==='sanidad'?'block':'none'
+  document.getElementById('cria-tab-partos').style.display=t==='partos'?'block':'none'
+  renderCria()
+}
+
+function populateCriaLotes(ids){
+  const opts='<option value="">Sin potrero</option>'+DB.lotes.map(l=>`<option value="${l.id}">${l.nombre}</option>`).join('')
+  ids.forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=(id.includes('multiple')||el.multiple)?DB.lotes.map(l=>`<option value="${l.id}">${l.nombre}</option>`).join(''):opts})
+}
+function populateMadreSelect(){
+  const sel=document.getElementById('par-madre');if(!sel)return
+  sel.innerHTML='<option value="">Seleccionar…</option>'+(DB.madres||[]).filter(m=>m.estado!=='vendida').map(m=>`<option value="${m.id}">${m.caravana} — ${m.categoria}</option>`).join('')
+}
+
+// ── MADRES ───────────────────────────────────────
+function saveMadre(){
+  if(!DB.madres)DB.madres=[]
+  const car=document.getElementById('mad-caravana').value.trim()
+  if(!car){alert('Ingresá el número de caravana.');return}
+  const existId=document.getElementById('mad-id').value
+  if(existId){
+    const m=DB.madres.find(x=>x.id===existId)
+    if(m){
+      m.caravana=car;m.categoria=document.getElementById('mad-cat').value
+      m.raza=document.getElementById('mad-raza').value
+      m.estado=document.getElementById('mad-estado').value
+      m.loteId=document.getElementById('mad-lote').value
+      m.peso=parseFloat(document.getElementById('mad-peso').value)||0
+      m.origen=document.getElementById('mad-origen').value
+      m.obs=document.getElementById('mad-obs').value
+    }
+  } else {
+    DB.madres.push({id:uid(),caravana:car,
+      categoria:document.getElementById('mad-cat').value,
+      raza:document.getElementById('mad-raza').value,
+      estado:document.getElementById('mad-estado').value,
+      loteId:document.getElementById('mad-lote').value,
+      fecha:document.getElementById('mad-fecha').value||today(),
+      peso:parseFloat(document.getElementById('mad-peso').value)||0,
+      origen:document.getElementById('mad-origen').value,
+      obs:document.getElementById('mad-obs').value,
+      creadoPor:currentUser.id
+    })
+  }
+  dbSave(DB);closeM('m-madre');document.getElementById('mad-id').value=''
+  logActivity('Madre registrada',car);render();toast(`Madre ${car} guardada`,'🐄')
+}
+
+function editMadre(id){
+  const m=DB.madres.find(x=>x.id===id);if(!m)return
+  document.getElementById('m-madre-title').textContent='Editar Madre'
+  document.getElementById('mad-id').value=m.id
+  document.getElementById('mad-caravana').value=m.caravana
+  document.getElementById('mad-cat').value=m.categoria
+  document.getElementById('mad-raza').value=m.raza||''
+  document.getElementById('mad-estado').value=m.estado
+  document.getElementById('mad-lote').value=m.loteId||''
+  document.getElementById('mad-fecha').value=m.fecha||''
+  document.getElementById('mad-peso').value=m.peso||''
+  document.getElementById('mad-origen').value=m.origen||'propio'
+  document.getElementById('mad-obs').value=m.obs||''
+  openM('m-madre')
+}
+
+function delMadre(id){
+  const m=DB.madres.find(x=>x.id===id);if(!m)return
+  if(!confirm(`¿Eliminar la madre ${m.caravana}? Sus partos y sanidades quedan registrados.`))return
+  DB.madres=DB.madres.filter(x=>x.id!==id);dbSave(DB);render();toast('Madre eliminada','🗑')
+}
+
+function openPartoDesdeMadre(madreId){
+  populateMadreSelect()
+  document.getElementById('par-madre').value=madreId
+  openM('m-parto')
+}
+
+// ── SANIDAD ──────────────────────────────────────
+function saveSanidad(){
+  if(!DB.sanidades)DB.sanidades=[]
+  const fecha=document.getElementById('san-fecha').value
+  const tipo=document.getElementById('san-tipo').value
+  const producto=document.getElementById('san-producto').value.trim()
+  if(!fecha||!producto){alert('Completá fecha y producto.');return}
+  const loteSel=document.getElementById('san-lotes')
+  const loteIds=[...loteSel.selectedOptions].map(o=>o.value)
+  DB.sanidades.push({id:uid(),fecha,tipo,producto,
+    dosis:document.getElementById('san-dosis').value.trim(),
+    loteIds,
+    animales:document.getElementById('san-animales').value.trim(),
+    costo:parseFloat(document.getElementById('san-costo').value)||0,
+    operario:document.getElementById('san-operario').value.trim(),
+    obs:document.getElementById('san-obs').value.trim(),
+    uid:currentUser.id,uname:currentUser.name
+  })
+  dbSave(DB);closeM('m-sanidad')
+  clr('san-producto','san-dosis','san-animales','san-costo','san-operario','san-obs')
+  logActivity('Sanidad registrada',`${SAN_LABEL[tipo]} — ${producto}`)
+  render();toast(`${SAN_LABEL[tipo]} registrada`,'💉')
+}
+
+function delSanidad(id){
+  if(!confirm('¿Eliminar este evento de sanidad?'))return
+  DB.sanidades=DB.sanidades.filter(s=>s.id!==id);dbSave(DB);render()
+}
+
+// ── PARTOS ───────────────────────────────────────
+function saveParto(){
+  if(!DB.partos)DB.partos=[]
+  const madreId=document.getElementById('par-madre').value
+  const fecha=document.getElementById('par-fecha').value
+  if(!madreId||!fecha){alert('Seleccioná la madre y la fecha.');return}
+  const madre=DB.madres.find(m=>m.id===madreId)
+  DB.partos.push({id:uid(),fecha,madreId,
+    madreCaravana:madre?madre.caravana:'',
+    criaCaravana:document.getElementById('par-cria-car').value.trim(),
+    sexo:document.getElementById('par-sexo').value,
+    pesoNacer:parseFloat(document.getElementById('par-peso').value)||0,
+    estadoCria:document.getElementById('par-estado-cria').value,
+    loteId:document.getElementById('par-lote').value,
+    obs:document.getElementById('par-obs').value.trim(),
+    uid:currentUser.id,uname:currentUser.name
+  })
+  // Update madre estado to parida
+  if(madre)madre.estado='parida'
+  dbSave(DB);closeM('m-parto')
+  clr('par-cria-car','par-peso','par-obs')
+  logActivity('Parto registrado',`Madre ${madre?madre.caravana:''}`)
+  render();toast('Parto registrado','🐣')
+}
+
+function delParto(id){
+  if(!confirm('¿Eliminar este registro de parto?'))return
+  DB.partos=DB.partos.filter(p=>p.id!==id);dbSave(DB);render()
+}
+
+// ── RENDER ───────────────────────────────────────
+function renderCria(){
+  if(!DB.madres)DB.madres=[]
+  if(!DB.sanidades)DB.sanidades=[]
+  if(!DB.partos)DB.partos=[]
+  const loteMap=Object.fromEntries(DB.lotes.map(l=>[l.id,l.nombre]))
+
+  // Update tab labels
+  const tabs=document.querySelectorAll('#p-cria .tab')
+  if(tabs[0])tabs[0].textContent=`🐄 Madres (${DB.madres.length})`
+  if(tabs[1])tabs[1].textContent=`💉 Sanidad (${DB.sanidades.length})`
+  if(tabs[2])tabs[2].textContent=`🐣 Partos (${DB.partos.length})`
+
+  // Populate lote filters
+  const loteOpts='<option value="">Todos los potreros</option>'+DB.lotes.map(l=>`<option value="${l.id}">${l.nombre}</option>`).join('')
+  ;['cria-lote-f','san-lote-f'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=loteOpts})
+
+  if(criaTab==='madres') renderMadres(loteMap)
+  else if(criaTab==='sanidad') renderSanidad(loteMap)
+  else if(criaTab==='partos') renderPartos(loteMap)
+}
+
+function renderMadres(loteMap){
+  // Stats
+  const el=document.getElementById('cria-stats');if(!el)return
+  const estados={preñada:0,parida:0,vacia:0,vendida:0}
+  DB.madres.forEach(m=>{if(estados[m.estado]!==undefined)estados[m.estado]++})
+  el.innerHTML=`
+    <div class="sc"><span class="sc-icon">🐄</span><div class="sc-label">Total madres</div><div class="sc-value">${DB.madres.length}</div></div>
+    <div class="sc"><span class="sc-icon">🤰</span><div class="sc-label">Preñadas</div><div class="sc-value" style="color:var(--gold)">${estados.preñada}</div></div>
+    <div class="sc"><span class="sc-icon">🐣</span><div class="sc-label">Paridas</div><div class="sc-value" style="color:var(--green)">${estados.parida}</div></div>
+    <div class="sc"><span class="sc-icon">⭕</span><div class="sc-label">Vacías</div><div class="sc-value" style="color:var(--hide)">${estados.vacia}</div></div>`
+
+  const srch=(document.getElementById('cria-search')||{value:''}).value.toLowerCase()
+  const estF=(document.getElementById('cria-estado-f')||{value:''}).value
+  const loteF=(document.getElementById('cria-lote-f')||{value:''}).value
+
+  let data=[...DB.madres]
+  if(srch)data=data.filter(m=>m.caravana.toLowerCase().includes(srch))
+  if(estF)data=data.filter(m=>m.estado===estF)
+  if(loteF)data=data.filter(m=>m.loteId===loteF)
+
+  const tb=document.getElementById('cria-tbody');if(!tb)return
+  tb.innerHTML=data.length?data.map(m=>{
+    const partos=DB.partos.filter(p=>p.madreId===m.id)
+    const ultSan=DB.sanidades.filter(s=>s.animales&&s.animales.includes(m.caravana)).sort((a,b)=>b.fecha.localeCompare(a.fecha))[0]
+    const estColor={preñada:'b-gold',parida:'b-green',vacia:'b-bark',vendida:'b-red'}
+    return`<tr>
+      <td><strong>${m.caravana}</strong></td>
+      <td>${m.categoria}</td>
+      <td>${m.raza||'-'}</td>
+      <td><span class="badge ${estColor[m.estado]||'b-bark'}">${m.estado}</span></td>
+      <td>${m.loteId?loteMap[m.loteId]||'-':'-'}</td>
+      <td style="font-size:11px;color:var(--hide)">${ultSan?$fd(ultSan.fecha)+' — '+ultSan.producto:'-'}</td>
+      <td style="text-align:center">${partos.length>0?`<span class="badge b-green">${partos.length}</span>`:'-'}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="icon-btn" title="Registrar parto" onclick="openPartoDesdeMadre('${m.id}')">🐣</button>
+          <button class="icon-btn" title="Editar" onclick="editMadre('${m.id}')">✏️</button>
+          <button class="icon-btn" title="Eliminar" onclick="delMadre('${m.id}')">🗑</button>
+        </div>
+      </td>
+    </tr>`
+  }).join(''):'<tr class="empty-row"><td colspan="8">Sin madres registradas — usá "+ Agregar Madre"</td></tr>'
+}
+
+function renderSanidad(loteMap={}){
+  if(!loteMap||!Object.keys(loteMap).length)loteMap=Object.fromEntries(DB.lotes.map(l=>[l.id,l.nombre]))
+  const tipoF=(document.getElementById('san-tipo-f')||{value:''}).value
+  const loteF=(document.getElementById('san-lote-f')||{value:''}).value
+
+  // Stats
+  const el=document.getElementById('san-stats');if(!el)return
+  const costoTotal=DB.sanidades.reduce((s,x)=>s+(x.costo||0),0)
+  el.innerHTML=`
+    <div class="sc"><span class="sc-icon">💉</span><div class="sc-label">Eventos</div><div class="sc-value">${DB.sanidades.length}</div></div>
+    <div class="sc"><span class="sc-icon">💊</span><div class="sc-label">Vacunas</div><div class="sc-value">${DB.sanidades.filter(s=>s.tipo==='vacuna').length}</div></div>
+    <div class="sc"><span class="sc-icon">🐛</span><div class="sc-label">Antiparasitarios</div><div class="sc-value">${DB.sanidades.filter(s=>s.tipo==='antiparasitario').length}</div></div>
+    <div class="sc"><span class="sc-icon">💰</span><div class="sc-label">Costo total</div><div class="sc-value" style="font-size:18px">${$m(costoTotal)}</div></div>`
+
+  let data=[...DB.sanidades].sort((a,b)=>b.fecha.localeCompare(a.fecha))
+  if(tipoF)data=data.filter(s=>s.tipo===tipoF)
+  if(loteF)data=data.filter(s=>s.loteIds&&s.loteIds.includes(loteF))
+
+  const tb=document.getElementById('san-tbody');if(!tb)return
+  tb.innerHTML=data.length?data.map(s=>`
+    <tr>
+      <td>${$fd(s.fecha)}</td>
+      <td><span class="badge ${SAN_BADGE[s.tipo]||'b-bark'}">${SAN_LABEL[s.tipo]||s.tipo}</span></td>
+      <td><strong>${s.producto}</strong></td>
+      <td style="font-size:12px">${s.dosis||'-'}</td>
+      <td style="font-size:11px;color:var(--hide)">${(s.loteIds||[]).map(id=>loteMap[id]||id).join(', ')||'Campo general'}</td>
+      <td style="font-size:11px;color:var(--hide)">${s.animales||'Todo el rodeo'}</td>
+      <td>${s.costo>0?$m(s.costo):'-'}</td>
+      <td style="font-size:11px;color:var(--hide)">${s.operario||s.uname||'-'}</td>
+      <td><button class="icon-btn" onclick="delSanidad('${s.id}')">🗑</button></td>
+    </tr>`).join('')
+  :'<tr class="empty-row"><td colspan="9">Sin eventos de sanidad</td></tr>'
+}
+
+function renderPartos(loteMap={}){
+  if(!loteMap||!Object.keys(loteMap).length)loteMap=Object.fromEntries(DB.lotes.map(l=>[l.id,l.nombre]))
+
+  const el=document.getElementById('partos-stats');if(!el)return
+  const vivos=DB.partos.filter(p=>p.estadoCria==='vivo').length
+  const machos=DB.partos.filter(p=>p.sexo==='macho').length
+  const hembras=DB.partos.filter(p=>p.sexo==='hembra').length
+  el.innerHTML=`
+    <div class="sc"><span class="sc-icon">🐣</span><div class="sc-label">Partos totales</div><div class="sc-value">${DB.partos.length}</div></div>
+    <div class="sc"><span class="sc-icon">✅</span><div class="sc-label">Crías vivas</div><div class="sc-value g">${vivos}</div></div>
+    <div class="sc"><span class="sc-icon">🐂</span><div class="sc-label">Machos</div><div class="sc-value">${machos}</div></div>
+    <div class="sc"><span class="sc-icon">🐄</span><div class="sc-label">Hembras</div><div class="sc-value o">${hembras}</div></div>`
+
+  const tb=document.getElementById('partos-tbody');if(!tb)return
+  const data=[...DB.partos].sort((a,b)=>b.fecha.localeCompare(a.fecha))
+  tb.innerHTML=data.length?data.map(p=>`
+    <tr>
+      <td>${$fd(p.fecha)}</td>
+      <td><strong>${p.madreCaravana||'-'}</strong></td>
+      <td>${p.criaCaravana||'—'}</td>
+      <td><span class="badge ${p.sexo==='macho'?'b-sky':'b-gold'}">${p.sexo==='macho'?'🐂 Macho':'🐄 Hembra'}</span></td>
+      <td>${p.pesoNacer>0?p.pesoNacer+' kg':'-'}</td>
+      <td><span class="badge ${p.estadoCria==='vivo'?'b-green':p.estadoCria==='vendido'?'b-sky':'b-red'}">${p.estadoCria}</span></td>
+      <td>${p.loteId?loteMap[p.loteId]||'-':'-'}</td>
+      <td style="font-size:11px;color:var(--hide)">${p.obs||'-'}</td>
+      <td><button class="icon-btn" onclick="delParto('${p.id}')">🗑</button></td>
+    </tr>`).join('')
+  :'<tr class="empty-row"><td colspan="9">Sin partos registrados</td></tr>'
+}
+
+// ══════════════════════════════════════════════════
 // GASOIL
 // ══════════════════════════════════════════════════
 function saveGasoil(){
@@ -3183,7 +3681,7 @@ function renderGasoil(){
 }
 
 function render(){
-  const fns=[renderDashboard,renderStock,renderIngresos,renderEgresos,renderReportes,renderLoteGrid,renderMapLotes,renderUsuarios,renderLluvia,renderTropas,renderLabores,renderGasoil]
+  const fns=[renderDashboard,renderStock,renderIngresos,renderEgresos,renderReportes,renderLoteGrid,renderMapLotes,renderUsuarios,renderLluvia,renderTropas,renderLabores,renderGasoil,renderCria]
   fns.forEach(fn=>{try{fn()}catch(e){console.error(fn.name+' failed:',e)}})
 }
 </script>
