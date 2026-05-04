@@ -345,6 +345,8 @@ tr:hover td{background:rgba(242,232,208,.4)}
     <div class="nav-sect">Análisis</div>
     <div class="nav-item" onclick="nav('reportes',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Reportes</div>
     <div class="nav-item" onclick="nav('lluvia',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="19" x2="8" y2="21"/><line x1="8" y1="13" x2="8" y2="15"/><line x1="16" y1="19" x2="16" y2="21"/><line x1="16" y1="13" x2="16" y2="15"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="12" y1="15" x2="12" y2="17"/><path d="M20 16.58A5 5 0 0018 7h-1.26A8 8 0 104 15.25"/></svg>Lluvias</div>
+    <div class="nav-item" onclick="nav('labores',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Labores</div>
+    <div class="nav-item" onclick="nav('gasoil',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22V8l9-6 9 6v14"/><path d="M10 22v-6h4v6"/><path d="M15 4v4h4"/></svg>Gasoil</div>
     <div class="nav-sect">Sistema</div>
     <div class="nav-item" id="nav-usuarios" onclick="nav('usuarios',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Usuarios</div>
     <div class="nav-item" onclick="nav('excel',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Excel</div>
@@ -786,6 +788,85 @@ tr:hover td{background:rgba(242,232,208,.4)}
   </div>
 </div>
 
+<!-- LABORES -->
+<div class="page" id="p-labores">
+  <div class="ph">
+    <div><div class="ph-title">Labores</div><div class="ph-sub">Desmalezado, fumigación y fertilización</div></div>
+    <div class="ph-actions"><button class="btn btn-p" onclick="openM('m-labor')">+ Registrar Labor</button></div>
+  </div>
+  <div class="stats" id="labores-stats"></div>
+
+  <!-- Tabla general -->
+  <div class="tw" style="margin-bottom:20px">
+    <div class="tw-head">
+      <h3>📋 Todas las Labores</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <select id="labor-filtro-tipo" onchange="renderLabores()" style="padding:5px 9px;border:1.5px solid var(--wheat);border-radius:6px;font-size:12px;background:var(--paper);outline:none">
+          <option value="">Todos los tipos</option>
+          <option value="desmalezado">Desmalezado</option>
+          <option value="fumigacion">Fumigación</option>
+          <option value="fertilizacion">Fertilización</option>
+          <option value="otro">Otro</option>
+        </select>
+        <select id="labor-filtro-lote" onchange="renderLabores()" style="padding:5px 9px;border:1.5px solid var(--wheat);border-radius:6px;font-size:12px;background:var(--paper);outline:none">
+          <option value="">Todos los potreros</option>
+        </select>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>Fecha</th><th>Tipo</th><th>Potrero</th><th>Insumo</th><th>Dosis / Cant.</th><th>Observaciones</th><th>Operario</th><th></th></tr></thead>
+      <tbody id="labores-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Por potrero -->
+  <div class="tw">
+    <div class="tw-head"><h3>🗺 Historial por Potrero</h3></div>
+    <div style="padding:14px" id="labores-por-lote"></div>
+  </div>
+</div>
+
+<!-- GASOIL -->
+<div class="page" id="p-gasoil">
+  <div class="ph">
+    <div><div class="ph-title">Gasoil</div><div class="ph-sub">Stock y consumo de combustible</div></div>
+    <div class="ph-actions">
+      <button class="btn btn-g" onclick="openM('m-gasoil-config')" style="margin-right:8px">⚙️ Stock mínimo</button>
+      <button class="btn btn-p" onclick="openM('m-gasoil')">+ Carga de Gasoil</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats" id="gasoil-stats"></div>
+
+  <!-- Alerta stock -->
+  <div id="gasoil-alerta" style="display:none;background:rgba(184,60,42,.1);border:2px solid var(--rust);border-radius:10px;padding:14px 18px;margin-bottom:18px;display:none;align-items:center;gap:12px">
+    <span style="font-size:24px">⚠️</span>
+    <div><div style="font-weight:600;color:var(--rust)">Stock bajo de gasoil</div><div id="gasoil-alerta-txt" style="font-size:12px;color:var(--hide)"></div></div>
+  </div>
+
+  <!-- Gráfico consumo mensual -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px">
+    <div class="tw">
+      <div class="tw-head"><h3>📊 Cargas por Mes</h3></div>
+      <div style="padding:16px" id="gasoil-chart"></div>
+    </div>
+    <div class="tw">
+      <div class="tw-head"><h3>🚜 Por Equipo / Uso</h3></div>
+      <div style="padding:16px" id="gasoil-por-equipo"></div>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="tw">
+    <div class="tw-head"><h3>Historial de Cargas</h3></div>
+    <table>
+      <thead><tr><th>Fecha</th><th>Litros</th><th>Equipo / Uso</th><th>Operario</th><th>Observaciones</th><th></th></tr></thead>
+      <tbody id="gasoil-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
 <!-- EXCEL -->
 <div class="page" id="p-excel">
   <div class="ph"><div><div class="ph-title">Excel</div><div class="ph-sub">Exportar e importar datos</div></div></div>
@@ -857,7 +938,7 @@ tr:hover td{background:rgba(242,232,208,.4)}
       <div class="fr"><div class="fg"><label>Color en mapa</label><input id="l-color" type="color" value="#4A7C59" style="height:38px;cursor:pointer"></div><div class="fg"><label>Agua / Riego</label><select id="l-riego"><option value="natural">Natural / Sin riego</option><option value="riego">Riego por gravedad</option><option value="aspersion">Aspersión</option><option value="goteo">Goteo</option><option value="aguada">Aguada / Bebedero</option></select></div></div>
       <div class="div" style="margin:10px 0"></div>
       <div style="font-size:12px;font-weight:600;color:var(--bark);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Cultivo / Uso Actual</div>
-      <div class="fr3"><div class="fg"><label>Cultivo</label><select id="l-cultivo"><option value="">Sin cultivo</option><option>Soja</option><option>Maíz</option><option>Trigo</option><option>Girasol</option><option>Sorgo</option><option>Alfalfa</option><option>Pastizal natural</option><option>Pastura implantada</option><option>Barbecho</option><option>Forestal</option><option>Otro</option></select></div><div class="fg"><label>Fecha de Siembra</label><input id="l-siembra" type="date"></div><div class="fg"><label>Superficie sembrada (ha)</label><input id="l-sup-sem" type="number" step="0.1" placeholder="0.0"></div></div>
+      <div class="fr3"><div class="fg"><label>Cultivo</label><select id="l-cultivo"><option value="">Sin cultivo</option><option>Avena</option><option>Rye grass</option><option>Verdeo</option><option>Pastura implantada</option><option>Pastizal natural</option><option>Forestal</option><option>Corrales</option><option>Casco</option><option>Laguna</option><option>Bajo</option><option>Callejón</option><option>Canal</option><option>Tambo</option><option>Soja</option><option>Maíz</option><option>Trigo</option><option>Sorgo</option><option>Alfalfa</option><option>Barbecho</option><option>Otro</option></select></div><div class="fg"><label>Fecha de Siembra</label><input id="l-siembra" type="date"></div><div class="fg"><label>Superficie sembrada (ha)</label><input id="l-sup-sem" type="number" step="0.1" placeholder="0.0"></div></div>
       <div class="fg"><label>Observaciones / Notas</label><textarea id="l-obs" rows="2" placeholder="Estado del suelo, arrendatario, etc."></textarea></div>
       <input type="hidden" id="l-id">
       <input type="hidden" id="l-points">
@@ -894,6 +975,82 @@ tr:hover td{background:rgba(242,232,208,.4)}
 </div>
 
 <div class="toast-wrap" id="toasts"></div>
+
+<!-- MODAL LABOR -->
+<div class="mb" id="m-labor">
+  <div class="modal">
+    <div class="mh"><h3>Registrar Labor</h3><button class="x-btn" onclick="closeM('m-labor')">✕</button></div>
+    <div class="mb-body">
+      <div class="fr">
+        <div class="fg"><label>Fecha *</label><input id="lab-fecha" type="date"></div>
+        <div class="fg"><label>Tipo *</label>
+          <select id="lab-tipo">
+            <option value="desmalezado">Desmalezado</option>
+            <option value="fumigacion">Fumigación</option>
+            <option value="fertilizacion">Fertilización</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label>Potrero(s) *</label>
+        <select id="lab-lote" multiple style="height:100px">
+        </select>
+        <div style="font-size:11px;color:var(--hide);margin-top:3px">Mantenés Ctrl/Cmd para seleccionar varios</div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Insumo utilizado</label><input id="lab-insumo" placeholder="ej. Glifosato, Urea, 2-4D…"></div>
+        <div class="fg"><label>Dosis / Cantidad</label><input id="lab-dosis" placeholder="ej. 2 L/ha, 100 kg/ha…"></div>
+      </div>
+      <div class="fg"><label>Observaciones</label><textarea id="lab-obs" rows="2" placeholder="Condiciones, resultados, notas…"></textarea></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-g" onclick="closeM('m-labor')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveLabor()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GASOIL CARGA -->
+<div class="mb" id="m-gasoil">
+  <div class="modal">
+    <div class="mh"><h3>Registrar Carga de Gasoil</h3><button class="x-btn" onclick="closeM('m-gasoil')">✕</button></div>
+    <div class="mb-body">
+      <div class="fr">
+        <div class="fg"><label>Fecha *</label><input id="gs-fecha" type="date"></div>
+        <div class="fg"><label>Litros *</label><input id="gs-litros" type="number" step="0.5" min="0" placeholder="ej. 200"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Equipo / Uso</label><input id="gs-equipo" placeholder="ej. Tractor, Camioneta, Generador…"></div>
+        <div class="fg"><label>Tipo de movimiento</label>
+          <select id="gs-tipo">
+            <option value="carga">Carga (entrada)</option>
+            <option value="consumo">Consumo (salida)</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label>Observaciones</label><input id="gs-obs" placeholder="Opcional"></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-g" onclick="closeM('m-gasoil')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveGasoil()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GASOIL CONFIG -->
+<div class="mb" id="m-gasoil-config">
+  <div class="modal">
+    <div class="mh"><h3>Configurar Stock Mínimo</h3><button class="x-btn" onclick="closeM('m-gasoil-config')">✕</button></div>
+    <div class="mb-body">
+      <div class="fg"><label>Stock mínimo (litros)</label><input id="gs-minimo" type="number" min="0" placeholder="ej. 500"></div>
+      <div style="font-size:12px;color:var(--hide);margin-top:4px">Cuando el stock actual sea menor a este valor, aparece una alerta en la pantalla de Gasoil.</div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-g" onclick="closeM('m-gasoil-config')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveGasoilConfig()">Guardar</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL LLUVIA -->
 <div class="mb" id="m-tropa">
@@ -1109,12 +1266,12 @@ const USE_JSONBIN = JSONBIN_ID !== 'TU_BIN_ID_AQUI'
 
 const DB_LOCAL_KEY = 'gc_lasnenas_2026'  // cache local para modo offline
 
-let DB = {animales:[],lotes:LOTES_SHAPE.map(l=>({...l})),ingresos:[],egresos:[],actlog:[],lluvias:[]}
+let DB = {animales:[],lotes:LOTES_SHAPE.map(l=>({...l})),ingresos:[],egresos:[],actlog:[],lluvias:[],tropas:[],labores:[],gasoil:[],gasoilConfig:{minimo:500}}
 let syncStatus = 'local'  // 'local' | 'syncing' | 'ok' | 'error'
 let syncDebounce = null
 
 function dbEmpty(){
-  return{animales:[],lotes:LOTES_SHAPE.map(l=>({...l})),ingresos:[],egresos:[],actlog:[],lluvias:[],tropas:[]}
+  return{animales:[],lotes:LOTES_SHAPE.map(l=>({...l})),ingresos:[],egresos:[],actlog:[],lluvias:[],tropas:[],labores:[],gasoil:[],gasoilConfig:{minimo:500}}
 }
 
 // Cargar desde JSONBin (o localStorage como fallback)
@@ -1163,6 +1320,9 @@ function mergeLocalRemote(local,remote){
     actlog:   winner(local.actlog,remote.actlog),
     lluvias:  winner(local.lluvias||[],remote.lluvias||[]),
     tropas:   winner(local.tropas||[],remote.tropas||[]),
+    labores:  winner(local.labores||[],remote.labores||[]),
+    gasoil:   winner(local.gasoil||[],remote.gasoil||[]),
+    gasoilConfig: local.gasoilConfig||remote.gasoilConfig||{minimo:500},
   }
 }
 
@@ -1335,6 +1495,8 @@ function openM(id){
   if(f&&!f.value)f.value=today()
   if(id==='m-animal')populateLoteSelect()
   if(id==='m-ing'){toggleIngFields()}
+  if(id==='m-labor'){populateLaborLote()}
+  if(id==='m-gasoil-config'){const el=document.getElementById('gs-minimo');if(el)el.value=DB.gasoilConfig?.minimo||500}
   if(id==='m-lluvia'){populateLluviaLote()}
   if(id==='m-tropa'){populateTropaLote()}
 }
@@ -1551,7 +1713,7 @@ const CULTIVO_COLORS={
   'Soja':'#7CBE60','Maíz':'#E8C440','Trigo':'#D4A849','Girasol':'#F5C542',
   'Sorgo':'#C67B3A','Alfalfa':'#5BA36A','Pastizal natural':'#8BBF6A','Laguna':'#5B9BD5','Bajo':'#7EC8E3','Callejón':'#C8A96E','Tambo':'#D4A96A','Casco':'#E8D5A3',
   'Pastura implantada':'#4A9C5D','Barbecho':'#A08B6E','Forestal':'#2D6B3A',
-  'Avena':'#C8B84A','Agropirón':'#B8A83A','Pastura 2016':'#3D8C52','Pastura 2024':'#27AE60','Pastura 2025':'#3AAD6B','Agricultura':'#D4884A',
+  'Avena':'#C8B84A','Rye grass':'#7EC878','Verdeo':'#A8D45A','Agropirón':'#B8A83A','Pastura 2016':'#3D8C52','Pastura 2024':'#27AE60','Pastura 2025':'#3AAD6B','Agricultura':'#D4884A',
   'Corrales':'#8B7355','Casa':'#C8A87A','Calles internas':'#B0A090',
   'Callejón':'#B0A090','Cañada':'#6A9BB8','CN':'#8BBF6A',
   'Monte':'#2D6B3A','Otro':'#8FAE95','':'#9EAF95'
@@ -2805,8 +2967,223 @@ function renderLluvia(){
     </div>`).join('')
 }
 
+// ══════════════════════════════════════════════════
+// LABORES
+// ══════════════════════════════════════════════════
+const LABOR_LABEL={desmalezado:'Desmalezado',fumigacion:'Fumigación',fertilizacion:'Fertilización',otro:'Otro'}
+const LABOR_BADGE={desmalezado:'b-green',fumigacion:'b-red',fertilizacion:'b-gold',otro:'b-bark'}
+
+function populateLaborLote(){
+  const sel=document.getElementById('lab-lote');if(!sel)return
+  sel.innerHTML=DB.lotes.map(l=>`<option value="${l.id}">${l.nombre}</option>`).join('')
+  const filtro=document.getElementById('labor-filtro-lote');if(!filtro)return
+  filtro.innerHTML='<option value="">Todos los potreros</option>'+DB.lotes.map(l=>`<option value="${l.id}">${l.nombre}</option>`).join('')
+}
+
+function saveLabor(){
+  if(!DB.labores)DB.labores=[]
+  const fecha=document.getElementById('lab-fecha').value
+  const tipo=document.getElementById('lab-tipo').value
+  const sel=document.getElementById('lab-lote')
+  const loteIds=[...sel.selectedOptions].map(o=>o.value)
+  if(!fecha||!tipo){alert('Completá fecha y tipo.');return}
+  const insumo=document.getElementById('lab-insumo').value.trim()
+  const dosis=document.getElementById('lab-dosis').value.trim()
+  const obs=document.getElementById('lab-obs').value.trim()
+  // Create one record per lote (or one general if none selected)
+  const ids=loteIds.length?loteIds:['']
+  ids.forEach(loteId=>{
+    DB.labores.push({id:uid(),fecha,tipo,loteId,insumo,dosis,obs,
+      uid:currentUser.id,uname:currentUser.name})
+  })
+  dbSave(DB)
+  logActivity('Labor registrada',`${LABOR_LABEL[tipo]} ${insumo?'— '+insumo:''}`)
+  closeM('m-labor');clr('lab-insumo','lab-dosis','lab-obs')
+  render();toast(`Labor registrada en ${ids.length} potrero(s)`,'🌿')
+}
+
+function delLabor(id){
+  if(!confirm('¿Eliminar este registro?'))return
+  DB.labores=DB.labores.filter(l=>l.id!==id);dbSave(DB);render()
+}
+
+function renderLabores(){
+  if(!DB.labores)DB.labores=[]
+  const loteMap=Object.fromEntries(DB.lotes.map(l=>[l.id,l.nombre]))
+  const tipoF=(document.getElementById('labor-filtro-tipo')||{value:''}).value
+  const loteF=(document.getElementById('labor-filtro-lote')||{value:''}).value
+
+  // Stats
+  const el=document.getElementById('labores-stats');if(!el)return
+  const tipos=['desmalezado','fumigacion','fertilizacion']
+  el.innerHTML=tipos.map(t=>{
+    const n=DB.labores.filter(l=>l.tipo===t).length
+    return`<div class="sc"><span class="sc-icon">${t==='desmalezado'?'🌿':t==='fumigacion'?'💊':'🌾'}</span><div class="sc-label">${LABOR_LABEL[t]}</div><div class="sc-value">${n}</div><div class="sc-sub">aplicaciones</div></div>`
+  }).join('')+`<div class="sc"><span class="sc-icon">📋</span><div class="sc-label">Total</div><div class="sc-value">${DB.labores.length}</div><div class="sc-sub">registros</div></div>`
+
+  populateLaborLote()
+
+  // Tabla general
+  let data=[...DB.labores].sort((a,b)=>b.fecha.localeCompare(a.fecha))
+  if(tipoF)data=data.filter(l=>l.tipo===tipoF)
+  if(loteF)data=data.filter(l=>l.loteId===loteF)
+  const tb=document.getElementById('labores-tbody');if(!tb)return
+  tb.innerHTML=data.length?data.map(l=>`
+    <tr>
+      <td>${$fd(l.fecha)}</td>
+      <td><span class="badge ${LABOR_BADGE[l.tipo]||'b-bark'}">${LABOR_LABEL[l.tipo]||l.tipo}</span></td>
+      <td>${l.loteId?loteMap[l.loteId]||'-':'Campo general'}</td>
+      <td style="font-weight:600">${l.insumo||'-'}</td>
+      <td style="font-size:12px;color:var(--hide)">${l.dosis||'-'}</td>
+      <td style="font-size:12px;color:var(--hide)">${l.obs||'-'}</td>
+      <td style="font-size:11px;color:var(--hide)">${l.uname||'-'}</td>
+      <td><button class="icon-btn" onclick="delLabor('${l.id}')">🗑</button></td>
+    </tr>`).join('')
+  :'<tr class="empty-row"><td colspan="8">Sin registros de labores</td></tr>'
+
+  // Por potrero
+  const porLote={}
+  DB.labores.forEach(l=>{
+    const k=l.loteId||'__general__'
+    const label=l.loteId?(loteMap[l.loteId]||'Desconocido'):'Campo general'
+    if(!porLote[k])porLote[k]={label,labores:[]}
+    porLote[k].labores.push(l)
+  })
+  const plEl=document.getElementById('labores-por-lote');if(!plEl)return
+  const lotesSorted=Object.values(porLote).sort((a,b)=>b.labores.length-a.labores.length)
+  if(!lotesSorted.length){plEl.innerHTML='<div style="color:var(--hide);font-size:12px">Sin registros</div>';return}
+  plEl.innerHTML=lotesSorted.map(({label,labores})=>{
+    const porTipo={}
+    labores.forEach(l=>{porTipo[l.tipo]=(porTipo[l.tipo]||0)+1})
+    const badges=Object.entries(porTipo).map(([t,n])=>
+      `<span class="badge ${LABOR_BADGE[t]||'b-bark'}">${n} ${LABOR_LABEL[t]||t}</span>`).join(' ')
+    const hist=[...labores].sort((a,b)=>b.fecha.localeCompare(a.fecha)).slice(0,3)
+      .map(l=>`<div style="font-size:11px;color:var(--hide);padding:3px 0;border-bottom:1px solid var(--wheat)">${$fd(l.fecha)} — <strong>${LABOR_LABEL[l.tipo]}</strong>${l.insumo?' ('+l.insumo+')':''}</div>`).join('')
+    return`<div style="border:1.5px solid var(--wheat);border-radius:9px;margin-bottom:12px;overflow:hidden">
+      <div style="background:var(--parch);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+        <strong>${label}</strong><div style="display:flex;gap:5px;flex-wrap:wrap">${badges}</div>
+      </div>
+      <div style="padding:8px 14px">${hist}</div>
+    </div>`
+  }).join('')
+}
+
+// ══════════════════════════════════════════════════
+// GASOIL
+// ══════════════════════════════════════════════════
+function saveGasoil(){
+  if(!DB.gasoil)DB.gasoil=[]
+  const fecha=document.getElementById('gs-fecha').value
+  const litros=parseFloat(document.getElementById('gs-litros').value)||0
+  if(!fecha||litros<=0){alert('Completá fecha y litros.');return}
+  DB.gasoil.push({id:uid(),fecha,litros,
+    tipo:document.getElementById('gs-tipo').value,
+    equipo:document.getElementById('gs-equipo').value.trim(),
+    obs:document.getElementById('gs-obs').value.trim(),
+    uid:currentUser.id,uname:currentUser.name})
+  dbSave(DB)
+  logActivity('Gasoil registrado',`${litros}L`)
+  closeM('m-gasoil');clr('gs-litros','gs-equipo','gs-obs')
+  render();toast(`${litros}L registrados`,'⛽')
+}
+
+function saveGasoilConfig(){
+  if(!DB.gasoilConfig)DB.gasoilConfig={minimo:500}
+  const v=parseFloat(document.getElementById('gs-minimo').value)||0
+  DB.gasoilConfig.minimo=v
+  dbSave(DB);closeM('m-gasoil-config');render()
+  toast('Stock mínimo actualizado','⚙️')
+}
+
+function delGasoil(id){
+  if(!confirm('¿Eliminar este registro?'))return
+  DB.gasoil=DB.gasoil.filter(g=>g.id!==id);dbSave(DB);render()
+}
+
+function renderGasoil(){
+  if(!DB.gasoil)DB.gasoil=[]
+  if(!DB.gasoilConfig)DB.gasoilConfig={minimo:500}
+
+  // Stock actual = sum cargas - sum consumos
+  const stock=DB.gasoil.reduce((s,g)=>g.tipo==='carga'?s+g.litros:s-g.litros,0)
+  const totalCargado=DB.gasoil.filter(g=>g.tipo==='carga').reduce((s,g)=>s+g.litros,0)
+  const totalConsumido=DB.gasoil.filter(g=>g.tipo==='consumo').reduce((s,g)=>s+g.litros,0)
+  const minimo=DB.gasoilConfig.minimo||500
+
+  // Alerta
+  const alerta=document.getElementById('gasoil-alerta')
+  if(alerta){
+    const bajo=stock<minimo&&DB.gasoil.length>0
+    alerta.style.display=bajo?'flex':'none'
+    if(bajo){
+      document.getElementById('gasoil-alerta-txt').textContent=
+        `Stock actual: ${stock.toFixed(0)}L — mínimo configurado: ${minimo}L`
+    }
+  }
+
+  // Stats
+  const el=document.getElementById('gasoil-stats');if(!el)return
+  const stockColor=stock<minimo?'var(--rust)':'var(--green)'
+  el.innerHTML=`
+    <div class="sc"><span class="sc-icon">⛽</span><div class="sc-label">Stock actual</div><div class="sc-value" style="color:${stockColor}">${stock.toFixed(0)}</div><div class="sc-sub">litros disponibles</div></div>
+    <div class="sc"><span class="sc-icon">📥</span><div class="sc-label">Total cargado</div><div class="sc-value g">${totalCargado.toFixed(0)}</div><div class="sc-sub">litros ingresados</div></div>
+    <div class="sc"><span class="sc-icon">📤</span><div class="sc-label">Total consumido</div><div class="sc-value o">${totalConsumido.toFixed(0)}</div><div class="sc-sub">litros usados</div></div>
+    <div class="sc"><span class="sc-icon">🔔</span><div class="sc-label">Stock mínimo</div><div class="sc-value">${minimo.toFixed(0)}</div><div class="sc-sub">litros de alerta</div></div>`
+
+  // Gráfico mensual
+  const byMes={}
+  DB.gasoil.forEach(g=>{
+    const m=g.fecha.slice(0,7)
+    if(!byMes[m])byMes[m]={carga:0,consumo:0}
+    byMes[m][g.tipo]=(byMes[m][g.tipo]||0)+g.litros
+  })
+  const meses=Object.keys(byMes).sort().slice(-8)
+  const chartEl=document.getElementById('gasoil-chart');if(!chartEl)return
+  const maxG=Math.max(...meses.map(m=>byMes[m].carga||0),1)
+  chartEl.innerHTML=meses.length?meses.map(m=>{
+    const [y,mo]=m.split('-')
+    const MESES=['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+    const label=`${MESES[parseInt(mo)]} ${y}`
+    const carga=byMes[m].carga||0; const cons=byMes[m].consumo||0
+    return`<div class="bar-row">
+      <div class="bar-label"><span>${label}</span><span style="color:var(--green);font-size:11px">+${carga.toFixed(0)}L${cons>0?' / -'+cons.toFixed(0)+'L':''}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(carga/maxG*100).toFixed(0)}%;background:var(--green)"></div></div>
+    </div>`
+  }).join(''):'<div style="color:var(--hide);font-size:12px">Sin registros</div>'
+
+  // Por equipo
+  const byEquipo={}
+  DB.gasoil.forEach(g=>{
+    const k=g.equipo||'Sin especificar'
+    if(!byEquipo[k])byEquipo[k]=0
+    byEquipo[k]+=g.tipo==='carga'?g.litros:-g.litros
+  })
+  const eqEl=document.getElementById('gasoil-por-equipo');if(!eqEl)return
+  const equipos=Object.entries(byEquipo).sort((a,b)=>b[1]-a[1])
+  const maxEq=Math.max(...equipos.map(e=>Math.abs(e[1])),1)
+  eqEl.innerHTML=equipos.length?equipos.map(([eq,lt])=>`
+    <div class="bar-row">
+      <div class="bar-label"><span>${eq}</span><span style="color:var(--sky)">${lt.toFixed(0)}L</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(Math.abs(lt)/maxEq*100).toFixed(0)}%;background:var(--sky)"></div></div>
+    </div>`).join(''):'<div style="color:var(--hide);font-size:12px">Sin datos</div>'
+
+  // Tabla
+  const tb=document.getElementById('gasoil-tbody');if(!tb)return
+  const data=[...DB.gasoil].sort((a,b)=>b.fecha.localeCompare(a.fecha))
+  tb.innerHTML=data.length?data.map(g=>`
+    <tr>
+      <td>${$fd(g.fecha)}</td>
+      <td><span style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:${g.tipo==='carga'?'var(--green)':'var(--rust)'}">${g.tipo==='carga'?'+':'−'}${g.litros}</span> <span style="font-size:11px;color:var(--hide)">L</span></td>
+      <td>${g.equipo||'-'}</td>
+      <td style="font-size:11px;color:var(--hide)">${g.uname||'-'}</td>
+      <td style="font-size:12px;color:var(--hide)">${g.obs||'-'}</td>
+      <td><button class="icon-btn" onclick="delGasoil('${g.id}')">🗑</button></td>
+    </tr>`).join('')
+  :'<tr class="empty-row"><td colspan="6">Sin registros de gasoil</td></tr>'
+}
+
 function render(){
-  const fns=[renderDashboard,renderStock,renderIngresos,renderEgresos,renderReportes,renderLoteGrid,renderMapLotes,renderUsuarios,renderLluvia,renderTropas]
+  const fns=[renderDashboard,renderStock,renderIngresos,renderEgresos,renderReportes,renderLoteGrid,renderMapLotes,renderUsuarios,renderLluvia,renderTropas,renderLabores,renderGasoil]
   fns.forEach(fn=>{try{fn()}catch(e){console.error(fn.name+' failed:',e)}})
 }
 </script>
