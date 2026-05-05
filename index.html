@@ -2583,12 +2583,14 @@ function renderEgresos(){
 // DASHBOARD
 // ══════════════════════════════════════════════════
 function renderDashboard(){
-  const act=DB.animales.filter(a=>a.estado==='activo')
+  const actAnimales=DB.animales.filter(a=>a.estado==='activo')
+  const actMadres=(DB.madres||[]).filter(m=>m.estado!=='vendida')
+  const act=[...actAnimales,...actMadres.map(m=>({...m,origen:m.origen||'propio',categoria:m.categoria||'Vaca'}))]
   const ing=sum(DB.ingresos,i=>i.importe),egr=sum(DB.egresos,e=>e.importe),bal=ing-egr
   const m=curMonth(),ingM=sum(DB.ingresos.filter(i=>i.fecha.startsWith(m)),i=>i.importe),egrM=sum(DB.egresos.filter(e=>e.fecha.startsWith(m)),e=>e.importe)
   const totalHa=DB.lotes.reduce((s,l)=>s+(l.ha||0),0)
   const el=document.getElementById('dash-stats');if(!el)return
-  el.innerHTML=`<div class="sc"><span class="sc-icon">🐄</span><div class="sc-label">Cabezas Activas</div><div class="sc-value">${act.length}</div><div class="sc-sub">${act.filter(a=>a.origen==='propio').length} prop · ${act.filter(a=>a.origen==='capitalizacion').length} cap.</div></div><div class="sc"><span class="sc-icon">🗺</span><div class="sc-label">Lotes / Hectáreas</div><div class="sc-value">${DB.lotes.length}</div><div class="sc-sub">${totalHa.toFixed(1)} ha totales</div></div><div class="sc"><span class="sc-icon">💰</span><div class="sc-label">Ingresos (mes)</div><div class="sc-value g">${$m(ingM)}</div></div><div class="sc"><span class="sc-icon">📤</span><div class="sc-label">Egresos (mes)</div><div class="sc-value r">${$m(egrM)}</div></div><div class="sc"><span class="sc-icon">⚖️</span><div class="sc-label">Balance Total</div><div class="sc-value ${bal>=0?'g':'r'}">${$m(bal)}</div></div>`
+  el.innerHTML=`<div class="sc"><span class="sc-icon">🐄</span><div class="sc-label">Cabezas Activas</div><div class="sc-value">${act.length}</div><div class="sc-sub">${actAnimales.length} stock · ${actMadres.length} cría</div></div><div class="sc"><span class="sc-icon">🗺</span><div class="sc-label">Lotes / Hectáreas</div><div class="sc-value">${DB.lotes.length}</div><div class="sc-sub">${totalHa.toFixed(1)} ha totales</div></div><div class="sc"><span class="sc-icon">💰</span><div class="sc-label">Ingresos (mes)</div><div class="sc-value g">${$m(ingM)}</div></div><div class="sc"><span class="sc-icon">📤</span><div class="sc-label">Egresos (mes)</div><div class="sc-value r">${$m(egrM)}</div></div><div class="sc"><span class="sc-icon">⚖️</span><div class="sc-label">Balance Total</div><div class="sc-value ${bal>=0?'g':'r'}">${$m(bal)}</div></div>`
   const cats={};act.forEach(a=>{cats[a.categoria]=(cats[a.categoria]||0)+1})
   const colors=['var(--green)','var(--straw)','var(--sky)','var(--rust)','var(--gold)','var(--bark)']
   const rc=document.getElementById('dash-rodeo');if(!rc)return
