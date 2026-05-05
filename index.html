@@ -455,6 +455,11 @@ tr:hover td{background:rgba(242,232,208,.4)}
     <div><div class="ph-title">Rodeo de Cría</div><div class="ph-sub">Madres, sanidad y partos</div></div>
     <div class="ph-actions">
       <button class="btn btn-g" style="margin-right:8px" onclick="openM('m-sanidad')">💉 Registrar Sanidad</button>
+      <button class="btn btn-g" style="margin-right:8px" onclick="descargarPlantillaMadres()">📋 Plantilla Excel</button>
+      <label class="btn btn-g" style="cursor:pointer;margin-right:8px">
+        📂 Importar Excel
+        <input type="file" accept=".xlsx,.xls,.csv" id="madres-file" style="display:none" onchange="previewMadresExcel(this)">
+      </label>
       <button class="btn btn-p" onclick="openM('m-madre')">+ Agregar Madre</button>
     </div>
   </div>
@@ -468,6 +473,20 @@ tr:hover td{background:rgba(242,232,208,.4)}
 
   <!-- TAB MADRES -->
   <div id="cria-tab-madres">
+    <!-- Import preview area -->
+    <div id="madres-import-area" style="display:none;margin-bottom:16px">
+      <div class="tw">
+        <div class="tw-head" style="background:rgba(61,107,74,.08)">
+          <h3>📂 Vista previa de importación</h3>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-p" onclick="confirmarImportMadres()">✅ Importar</button>
+            <button class="btn btn-g" onclick="cancelImportMadres()">Cancelar</button>
+          </div>
+        </div>
+        <div style="padding:12px;font-size:13px;color:var(--earth);font-weight:500" id="madres-import-summary"></div>
+        <div style="padding:0 12px 12px;max-height:240px;overflow-y:auto" id="madres-import-preview"></div>
+      </div>
+    </div>
     <div class="stats" id="cria-stats"></div>
     <div class="filter-bar">
       <input type="text" id="cria-search" placeholder="Buscar caravana…" oninput="renderCria()">
@@ -3771,7 +3790,149 @@ function populateMadreSelect(){
   sel.innerHTML='<option value="">Seleccionar…</option>'+(DB.madres||[]).filter(m=>m.estado!=='vendida').map(m=>`<option value="${m.id}">${m.caravana} — ${m.categoria}</option>`).join('')
 }
 
-// ── MADRES ───────────────────────────────────────
+// ── Importación Excel de Madres ───────────────────
+let madresImportData=[]
+
+function descargarPlantillaMadres(){
+  if(typeof XLSX==='undefined'){toast('Cargando…','⏳');return}
+  const ws=XLSX.utils.aoa_to_sheet([
+    ['Caravana','Categoría','Raza','Estado','Potrero','Peso (kg)','Origen','Observaciones'],
+    ['1001','Vaca','Angus','preñada','Potrero 01','450','propio',''],
+    ['1002','Vaquillona','Hereford','preñada','Potrero 02','380','propio','Primer servicio'],
+    ['1003','Vaca','Cruza','parida','Potrero 01','480','capitalizacion','Parto en marzo'],
+  ])
+  ws['!cols']=[{wch:12},{wch:12},{wch:12},{wch:12},{wch:14},{wch:10},{wch:14},{wch:20}]
+  const wb=XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb,ws,'Madres')
+  XLSX.writeFile(wb,'Plantilla_Madres_Cria.xlsx')
+  toast('Plantilla descargada','📋')
+}
+
+function previewMadresExcel(inp){
+  const file=inp.files[0]; if(!file)return
+  if(typeof XLSX==='undefined'){toast('Error: librería Excel no cargada','❌');return}
+  const reader=new FileReader()
+  reader.onload=e=>{
+    try{
+      let rows=[]
+      if(file.name.endsWith('.csv')){
+        // Parse CSV manually
+        const text=new TextDecoder().decode(new Uint8Array(e.target.result))
+        const lines=text.split('\n').filter(l=>l.trim())
+        const header=lines[0].split(/[,;|\t]/).map(h=>h.trim().replace(/"/g,''))
+        rows=lines.slice(1).map(l=>{
+          const vals=l.split(/[,;|\t]/).map(v=>v.trim().replace(/"/g,''))
+          const obj={}; header.forEach((h,i)=>obj[h]=vals[i]||'')
+          return obj
+        }).filter(r=>Object.values(r).some(v=>v))
+      } else {
+        const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'})
+        rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''})
+      }
+
+      if(!rows.length){toast('Planilla vacía o sin datos','❌');return}
+
+      // Flexible column detection — find caravana column
+      const firstRow=rows[0]
+      const keys=Object.keys(firstRow)
+      const carKey=keys.find(k=>/caravana|caravan|nro|n°|numero|number|id|tag/i.test(k))||keys[0]
+      const catKey=keys.find(k=>/categ|categoria|tipo|category/i.test(k))||null
+      const razaKey=keys.find(k=>/raza|breed|race/i.test(k))||null
+      const estKey=keys.find(k=>/estado|estado|status|reprod/i.test(k))||null
+      const loteKey=keys.find(k=>/potrero|lote|campo|paddock|potr/i.test(k))||null
+      const pesoKey=keys.find(k=>/peso|weight|kg/i.test(k))||null
+      const origenKey=keys.find(k=>/origen|origin|propiedad|owner/i.test(k))||null
+      const obsKey=keys.find(k=>/obs|nota|comment|observ/i.test(k))||null
+
+      // Build preview data
+      const loteMap=Object.fromEntries(DB.lotes.map(l=>[l.nombre.toLowerCase().trim(),l.id]))
+      const existing=new Set((DB.madres||[]).map(m=>m.caravana.toString().toLowerCase()))
+
+      madresImportData=[]
+      const dupes=[]
+      rows.forEach(r=>{
+        const car=String(r[carKey]||'').trim()
+        if(!car)return
+        if(existing.has(car.toLowerCase())){dupes.push(car);return}
+
+        // Resolve lote
+        const loteNombre=loteKey?String(r[loteKey]||'').trim():''
+        const loteId=loteNombre?Object.entries(loteMap).find(([n])=>n.includes(loteNombre.toLowerCase()))?.[1]||'':''
+
+        // Normalize estado
+        let estado=estKey?String(r[estKey]||'').trim().toLowerCase():'preñada'
+        if(/preg|preñ|prenh/i.test(estado))estado='preñada'
+        else if(/par/i.test(estado))estado='parida'
+        else if(/vac/i.test(estado))estado='vacia'
+        else if(/vend/i.test(estado))estado='vendida'
+        else estado='preñada'
+
+        // Normalize categoria
+        let cat=catKey?String(r[catKey]||'').trim():'Vaca'
+        if(/vaquil|novil|heifor/i.test(cat))cat='Vaquillona'
+        else cat='Vaca'
+
+        // Normalize origen
+        let origen=origenKey?String(r[origenKey]||'').trim().toLowerCase():'propio'
+        origen=(/cap|terc|extern/i.test(origen))?'capitalizacion':'propio'
+
+        madresImportData.push({
+          caravana:car, categoria:cat,
+          raza:razaKey?String(r[razaKey]||'').trim():'',
+          estado, loteId,
+          peso:pesoKey?parseFloat(r[pesoKey])||0:0,
+          origen,
+          obs:obsKey?String(r[obsKey]||'').trim():'',
+        })
+      })
+
+      // Show preview
+      document.getElementById('madres-import-summary').textContent=
+        `${madresImportData.length} madres listas para importar${dupes.length?' · '+dupes.length+' duplicadas omitidas':''}`
+
+      const previewHtml=`<table style="font-size:12px">
+        <thead><tr><th>Caravana</th><th>Categoría</th><th>Raza</th><th>Estado</th><th>Origen</th></tr></thead>
+        <tbody>${madresImportData.slice(0,15).map(m=>`
+          <tr>
+            <td><strong>${m.caravana}</strong></td>
+            <td>${m.categoria}</td>
+            <td>${m.raza||'-'}</td>
+            <td><span class="badge ${m.estado==='preñada'?'b-gold':m.estado==='parida'?'b-green':'b-bark'}">${m.estado}</span></td>
+            <td><span class="badge ${m.origen==='propio'?'b-green':'b-gold'}">${m.origen==='propio'?'Propio':'Cap.'}</span></td>
+          </tr>`).join('')}
+        ${madresImportData.length>15?`<tr class="empty-row"><td colspan="5">…y ${madresImportData.length-15} más</td></tr>`:''}</tbody>
+      </table>`
+      document.getElementById('madres-import-preview').innerHTML=previewHtml
+      document.getElementById('madres-import-area').style.display='block'
+      document.getElementById('madres-import-area').scrollIntoView({behavior:'smooth',block:'start'})
+    }catch(err){
+      toast('Error al leer la planilla: '+err.message,'❌')
+      console.error(err)
+    }
+  }
+  reader.readAsArrayBuffer(file)
+}
+
+function confirmarImportMadres(){
+  if(!madresImportData.length)return
+  if(!DB.madres)DB.madres=[]
+  const nuevas=madresImportData.map(m=>({
+    id:uid(), ...m,
+    fecha:today(), creadoPor:currentUser.id
+  }))
+  DB.madres.push(...nuevas)
+  dbSave(DB)
+  logActivity('Importación madres',`${nuevas.length} vacas de cría importadas`)
+  cancelImportMadres()
+  render()
+  toast(`${nuevas.length} madres importadas correctamente`,'🐄')
+}
+
+function cancelImportMadres(){
+  madresImportData=[]
+  document.getElementById('madres-import-area').style.display='none'
+  document.getElementById('madres-file').value=''
+}
 function saveMadre(){
   if(!DB.madres)DB.madres=[]
   const car=document.getElementById('mad-caravana').value.trim()
