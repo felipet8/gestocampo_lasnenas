@@ -891,14 +891,28 @@ tr:hover td{background:rgba(242,232,208,.4)}
 <div class="page" id="p-suplem">
   <div class="ph">
     <div><div class="ph-title">Suplementación</div><div class="ph-sub">Maíz, núcleos, rollos y creepfeeding</div></div>
-    <div class="ph-actions"><button class="btn btn-p" onclick="openM('m-suplem')">+ Registrar Suministro</button></div>
+    <div class="ph-actions">
+      <button class="btn btn-g" style="margin-right:8px" onclick="openM('m-insumo-ingreso')">📥 Ingreso de Insumos</button>
+      <button class="btn btn-p" onclick="openM('m-suplem')">+ Registrar Suministro</button>
+    </div>
   </div>
+
+  <!-- STOCK DE INSUMOS -->
+  <div id="insumo-alertas" style="margin-bottom:14px"></div>
+  <div class="tw" style="margin-bottom:20px">
+    <div class="tw-head">
+      <h3>📦 Stock de Insumos</h3>
+      <button class="btn btn-g" style="font-size:11px;padding:5px 10px" onclick="openM('m-insumo-config')">⚙️ Mínimos</button>
+    </div>
+    <div style="padding:16px" id="insumo-stock-panel"></div>
+  </div>
+
   <div class="stats" id="suplem-stats"></div>
 
   <!-- Gráfico por producto -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px">
     <div class="tw">
-      <div class="tw-head"><h3>📦 Por Producto</h3></div>
+      <div class="tw-head"><h3>📦 Consumo por Producto</h3></div>
       <div style="padding:16px" id="suplem-chart-prod"></div>
     </div>
     <div class="tw">
@@ -929,7 +943,7 @@ tr:hover td{background:rgba(242,232,208,.4)}
       </div>
     </div>
     <table>
-      <thead><tr><th>Fecha</th><th>Producto</th><th>Cantidad</th><th>Modalidad</th><th>Potrero</th><th>Categoría/Tropa</th><th>Costo</th><th>Obs.</th><th></th></tr></thead>
+      <thead><tr><th>Fecha</th><th>Producto</th><th>Cantidad</th><th>Modalidad</th><th>Potrero</th><th>Categoría/Tropa</th><th>Obs.</th><th></th></tr></thead>
       <tbody id="suplem-tbody"></tbody>
     </table>
   </div>
@@ -1310,8 +1324,28 @@ tr:hover td{background:rgba(242,232,208,.4)}
           </select>
         </div>
       </div>
+      <!-- Stock disponible indicator -->
+      <div id="sup-stock-info" style="background:rgba(61,107,74,.07);border:1px solid rgba(61,107,74,.2);border-radius:7px;padding:8px 12px;font-size:12px;margin-bottom:4px;display:none">
+        <span id="sup-stock-label"></span>
+      </div>
+      <!-- Rollo tipo selector (only shown when producto=rollo) -->
+      <div id="sup-rollo-tipo-fg" style="display:none" class="fg">
+        <label>Tipo de rollo *</label>
+        <select id="sup-rollo-tipo" onchange="updateStockInfo()">
+          <option value="pastura">Pastura</option>
+          <option value="verdeo">Verdeo</option>
+          <option value="avena">Avena</option>
+          <option value="rye grass">Rye grass</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <!-- Otro insumo nombre (only shown when producto=otro) -->
+      <div id="sup-otro-fg" style="display:none" class="fg">
+        <label>Nombre del insumo *</label>
+        <input id="sup-otro-nombre" placeholder="ej. Sal, Expeller, Urea…" oninput="updateStockInfo()">
+      </div>
       <div class="fr">
-        <div class="fg"><label id="sup-cant-label">Cantidad (kg) *</label><input id="sup-cantidad" type="number" step="0.1" min="0" placeholder="0"></div>
+        <div class="fg"><label id="sup-cant-label">Cantidad (kg) *</label><input id="sup-cantidad" type="number" step="0.1" min="0" placeholder="0" oninput="updateStockInfo()"></div>
         <div class="fg"><label>Modalidad *</label>
           <select id="sup-modalidad">
             <option value="corral">A corral</option>
@@ -1321,19 +1355,68 @@ tr:hover td{background:rgba(242,232,208,.4)}
           </select>
         </div>
       </div>
+      <!-- Stock after indicator -->
+      <div id="sup-stock-after" style="font-size:11px;color:var(--hide);margin-bottom:8px;display:none"></div>
       <div class="fr">
         <div class="fg"><label>Potrero</label><select id="sup-lote"><option value="">Sin especificar</option></select></div>
         <div class="fg"><label>Categoría / Tropa</label><input id="sup-tropa" placeholder="ej. Vacas preñadas, Terneros…"></div>
-      </div>
-      <div class="fr">
-        <div class="fg"><label>Costo ($)</label><input id="sup-costo" type="number" step="0.01" placeholder="Opcional"></div>
-        <div class="fg"><label>Registró</label><input id="sup-operario" placeholder="Nombre"></div>
       </div>
       <div class="fg"><label>Observaciones</label><input id="sup-obs" placeholder="Notas adicionales…"></div>
     </div>
     <div class="mf">
       <button class="btn btn-g" onclick="closeM('m-suplem')">Cancelar</button>
       <button class="btn btn-p" onclick="saveSuplem()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL INGRESO DE INSUMOS -->
+<div class="mb" id="m-insumo-ingreso">
+  <div class="modal">
+    <div class="mh"><h3>📥 Ingreso de Insumos</h3><button class="x-btn" onclick="closeM('m-insumo-ingreso')">✕</button></div>
+    <div class="mb-body">
+      <div class="fr">
+        <div class="fg"><label>Fecha *</label><input id="ins-fecha" type="date"></div>
+        <div class="fg"><label>Insumo *</label>
+          <select id="ins-tipo" onchange="toggleInsOtro()">
+            <option value="maiz">Maíz</option>
+            <option value="nucleo">Núcleo</option>
+            <option value="otro">Otro insumo</option>
+          </select>
+        </div>
+      </div>
+      <div id="ins-otro-fg" style="display:none" class="fg">
+        <label>Nombre del insumo *</label>
+        <input id="ins-otro-nombre" placeholder="ej. Sal, Expeller, Urea…">
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Cantidad (kg) *</label><input id="ins-cantidad" type="number" step="1" min="0" placeholder="ej. 5000"></div>
+        <div class="fg"><label>Costo ($)</label><input id="ins-costo" type="number" step="0.01" placeholder="Opcional"></div>
+      </div>
+      <div class="fg"><label>Proveedor / Observaciones</label><input id="ins-obs" placeholder="Opcional"></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-g" onclick="closeM('m-insumo-ingreso')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveInsumoIngreso()">Registrar Ingreso</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIG MÍNIMOS DE INSUMOS -->
+<div class="mb" id="m-insumo-config">
+  <div class="modal">
+    <div class="mh"><h3>⚙️ Stock Mínimo por Insumo</h3><button class="x-btn" onclick="closeM('m-insumo-config')">✕</button></div>
+    <div class="mb-body">
+      <p style="font-size:12px;color:var(--hide);margin-bottom:14px">Cuando el stock baje de estos valores aparece una alerta.</p>
+      <div class="fr">
+        <div class="fg"><label>Maíz (kg)</label><input id="cfg-maiz" type="number" min="0" placeholder="ej. 1000"></div>
+        <div class="fg"><label>Núcleo (kg)</label><input id="cfg-nucleo" type="number" min="0" placeholder="ej. 200"></div>
+      </div>
+      <div id="cfg-otros-panel" style="margin-top:8px"></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-g" onclick="closeM('m-insumo-config')">Cancelar</button>
+      <button class="btn btn-p" onclick="saveInsumoConfig()">Guardar</button>
     </div>
   </div>
 </div>
@@ -1690,12 +1773,12 @@ const USE_JSONBIN = JSONBIN_ID !== 'TU_BIN_ID_AQUI'
 
 const DB_LOCAL_KEY = 'gc_lasnenas_2026'  // cache local para modo offline
 
-let DB = {animales:[],lotes:LOTES_SHAPE.map(l=>({...l})),ingresos:[],egresos:[],actlog:[],lluvias:[],tropas:[],labores:[],gasoil:[],gasoilConfig:{minimo:500},madres:[],sanidades:[],partos:[],suplementos:[],rollosProduccion:[],rollosConsumo:[]}
+let DB = {animales:[],lotes:LOTES_SHAPE.map(l=>({...l})),ingresos:[],egresos:[],actlog:[],lluvias:[],tropas:[],labores:[],gasoil:[],gasoilConfig:{minimo:500},madres:[],sanidades:[],partos:[],suplementos:[],rollosProduccion:[],rollosConsumo:[],insumosIngresos:[],insumosConfig:{maiz:{minimo:500},nucleo:{minimo:100},otros:{}}}
 let syncStatus = 'local'  // 'local' | 'syncing' | 'ok' | 'error'
 let syncDebounce = null
 
 function dbEmpty(){
-  return{animales:[],lotes:LOTES_SHAPE.map(l=>({...l})),ingresos:[],egresos:[],actlog:[],lluvias:[],tropas:[],labores:[],gasoil:[],gasoilConfig:{minimo:500},madres:[],sanidades:[],partos:[],suplementos:[],rollosProduccion:[],rollosConsumo:[]}
+  return{animales:[],lotes:LOTES_SHAPE.map(l=>({...l})),ingresos:[],egresos:[],actlog:[],lluvias:[],tropas:[],labores:[],gasoil:[],gasoilConfig:{minimo:500},madres:[],sanidades:[],partos:[],suplementos:[],rollosProduccion:[],rollosConsumo:[],insumosIngresos:[],insumosConfig:{maiz:{minimo:500},nucleo:{minimo:100},otros:{}}}
 }
 
 // Cargar desde JSONBin (o localStorage como fallback)
@@ -1753,6 +1836,8 @@ function mergeLocalRemote(local,remote){
     suplementos:     winner(local.suplementos||[],remote.suplementos||[]),
     rollosProduccion:winner(local.rollosProduccion||[],remote.rollosProduccion||[]),
     rollosConsumo:   winner(local.rollosConsumo||[],remote.rollosConsumo||[]),
+    insumosIngresos: winner(local.insumosIngresos||[],remote.insumosIngresos||[]),
+    insumosConfig:   local.insumosConfig||remote.insumosConfig||{maiz:{minimo:500},nucleo:{minimo:100},otros:{}},
   }
 }
 
@@ -1928,7 +2013,15 @@ function openM(id){
   if(id==='m-suplem'){
     const loteOpts='<option value="">Sin especificar</option>'+DB.lotes.map(l=>`<option value="${l.id}">${l.nombre}</option>`).join('')
     document.getElementById('sup-lote').innerHTML=loteOpts
-    toggleSuplemUnidad()
+    toggleSuplemUnidad();updateStockInfo()
+  }
+  if(id==='m-insumo-config'){
+    if(!DB.insumosConfig)DB.insumosConfig={maiz:{minimo:500},nucleo:{minimo:100},otros:{}}
+    document.getElementById('cfg-maiz').value=DB.insumosConfig.maiz?.minimo||''
+    document.getElementById('cfg-nucleo').value=DB.insumosConfig.nucleo?.minimo||''
+  }
+  if(id==='m-insumo-ingreso'){
+    toggleInsOtro()
   }
   if(id==='m-rollo-produccion'||id==='m-rollo-consumo'){
     const loteOpts='<option value="">Sin especificar</option>'+DB.lotes.map(l=>`<option value="${l.id}">${l.nombre}</option>`).join('')
@@ -3526,104 +3619,273 @@ function renderLabores(){
 }
 
 // ══════════════════════════════════════════════════
-// SUPLEMENTACIÓN
+// SUPLEMENTACIÓN + STOCK DE INSUMOS
 // ══════════════════════════════════════════════════
 const SUPLEM_PROD_LABEL={maiz:'Maíz',nucleo:'Núcleo',rollo:'Rollo',otro:'Otro'}
 const SUPLEM_PROD_BADGE={maiz:'b-gold',nucleo:'b-sky',rollo:'b-green',otro:'b-bark'}
 const SUPLEM_MOD_LABEL={corral:'A corral',creepfeeding:'Creepfeeding',pastoreo:'Pastoreo',otro:'Otro'}
-const SUPLEM_PROD_UNIT={maiz:'kg',nucleo:'kg',rollo:'rollos',otro:'unidad'}
+const SUPLEM_PROD_UNIT={maiz:'kg',nucleo:'kg',rollo:'rollos',otro:''}
+
+// ── Stock calculado ───────────────────────────────
+function getStockInsumo(tipo, rolloTipo=''){
+  if(!DB.insumosIngresos)DB.insumosIngresos=[]
+  if(!DB.suplementos)DB.suplementos=[]
+  if(tipo==='rollo'){
+    // Use rollos module stock
+    const prod=(DB.rollosProduccion||[]).filter(r=>r.tipo===rolloTipo).reduce((a,r)=>a+r.cantidad,0)
+    const cons=(DB.rollosConsumo||[]).filter(r=>r.tipo===rolloTipo).reduce((a,r)=>a+r.cantidad,0)
+    // Also subtract rollos used via suplementación
+    const supCons=DB.suplementos.filter(s=>s.producto==='rollo'&&s.rolloTipo===rolloTipo).reduce((a,s)=>a+s.cantidad,0)
+    return prod-cons-supCons
+  }
+  // For maiz, nucleo, otros: ingresos minus suplementos consumed
+  const ingresos=DB.insumosIngresos.filter(i=>i.tipo===tipo&&(tipo!=='otro'||i.nombre===rolloTipo)).reduce((a,i)=>a+i.cantidad,0)
+  const consumido=DB.suplementos.filter(s=>s.producto===tipo&&(tipo!=='otro'||s.otroNombre===rolloTipo)).reduce((a,s)=>a+s.cantidad,0)
+  return ingresos-consumido
+}
 
 function toggleSuplemUnidad(){
   const prod=document.getElementById('sup-producto').value
   const lbl=document.getElementById('sup-cant-label')
   if(lbl)lbl.textContent=prod==='rollo'?'Cantidad (rollos) *':'Cantidad (kg) *'
+  const rolloFg=document.getElementById('sup-rollo-tipo-fg')
+  const otroFg=document.getElementById('sup-otro-fg')
+  if(rolloFg)rolloFg.style.display=prod==='rollo'?'block':'none'
+  if(otroFg)otroFg.style.display=prod==='otro'?'block':'none'
+  updateStockInfo()
 }
 
+function updateStockInfo(){
+  const prod=document.getElementById('sup-producto')?.value
+  const stockInfoEl=document.getElementById('sup-stock-info')
+  const stockAfterEl=document.getElementById('sup-stock-after')
+  if(!stockInfoEl||!prod)return
+
+  let stockKey=''; let rolloTipo=''
+  if(prod==='rollo'){rolloTipo=document.getElementById('sup-rollo-tipo')?.value||'pastura';stockKey=rolloTipo}
+  else if(prod==='otro'){stockKey=document.getElementById('sup-otro-nombre')?.value?.trim()||''}
+  else{stockKey=prod}
+
+  const stock=getStockInsumo(prod,stockKey)
+  const unit=SUPLEM_PROD_UNIT[prod]||'kg'
+  const cant=parseFloat(document.getElementById('sup-cantidad')?.value)||0
+  const afterStock=stock-cant
+  const hasStock=DB.insumosIngresos?.some(i=>i.tipo===prod)||(prod==='rollo'&&(DB.rollosProduccion||[]).length>0)
+
+  if(!hasStock&&prod!=='rollo'){
+    stockInfoEl.style.display='none'
+    if(stockAfterEl)stockAfterEl.style.display='none'
+    return
+  }
+
+  stockInfoEl.style.display='block'
+  const stockColor=stock<=0?'var(--rust)':stock<20&&prod==='rollo'?'var(--gold)':'var(--green)'
+  document.getElementById('sup-stock-label').innerHTML=
+    `📦 Stock disponible: <strong style="color:${stockColor}">${stock} ${unit}</strong>${prod==='rollo'?' de '+ROLLO_TIPO_LABEL[rolloTipo]:''}`
+
+  if(cant>0&&stockAfterEl){
+    stockAfterEl.style.display='block'
+    const afterColor=afterStock<0?'var(--rust)':afterStock<50?'var(--gold)':'var(--hide)'
+    stockAfterEl.innerHTML=`Después del suministro quedarán: <strong style="color:${afterColor}">${afterStock} ${unit}</strong>${afterStock<0?' ⚠️ Stock insuficiente':''}`
+  } else if(stockAfterEl){
+    stockAfterEl.style.display='none'
+  }
+}
+
+function toggleInsOtro(){
+  const tipo=document.getElementById('ins-tipo').value
+  const fg=document.getElementById('ins-otro-fg')
+  if(fg)fg.style.display=tipo==='otro'?'block':'none'
+}
+
+// ── Ingreso de insumos ────────────────────────────
+function saveInsumoIngreso(){
+  if(!DB.insumosIngresos)DB.insumosIngresos=[]
+  const fecha=document.getElementById('ins-fecha').value
+  const tipo=document.getElementById('ins-tipo').value
+  const cantidad=parseFloat(document.getElementById('ins-cantidad').value)||0
+  if(!fecha||cantidad<=0){alert('Completá fecha y cantidad.');return}
+  const otroNombre=tipo==='otro'?document.getElementById('ins-otro-nombre').value.trim():''
+  if(tipo==='otro'&&!otroNombre){alert('Ingresá el nombre del insumo.');return}
+  DB.insumosIngresos.push({id:uid(),fecha,tipo,
+    nombre:tipo==='otro'?otroNombre:SUPLEM_PROD_LABEL[tipo],
+    cantidad,
+    costo:parseFloat(document.getElementById('ins-costo').value)||0,
+    obs:document.getElementById('ins-obs').value.trim(),
+    uid:currentUser.id,uname:currentUser.name
+  })
+  dbSave(DB);closeM('m-insumo-ingreso')
+  clr('ins-cantidad','ins-costo','ins-obs','ins-otro-nombre')
+  logActivity('Ingreso insumo',`${tipo==='otro'?otroNombre:SUPLEM_PROD_LABEL[tipo]} — ${cantidad}kg`)
+  render();toast(`${cantidad}kg de ${tipo==='otro'?otroNombre:SUPLEM_PROD_LABEL[tipo]} ingresados al stock`,'📥')
+}
+
+// ── Config mínimos ────────────────────────────────
+function saveInsumoConfig(){
+  if(!DB.insumosConfig)DB.insumosConfig={maiz:{minimo:500},nucleo:{minimo:100},otros:{}}
+  DB.insumosConfig.maiz={minimo:parseFloat(document.getElementById('cfg-maiz').value)||0}
+  DB.insumosConfig.nucleo={minimo:parseFloat(document.getElementById('cfg-nucleo').value)||0}
+  dbSave(DB);closeM('m-insumo-config');render();toast('Mínimos actualizados','⚙️')
+}
+
+// ── Save suplemento con descuento de stock ────────
 function saveSuplem(){
   if(!DB.suplementos)DB.suplementos=[]
   const fecha=document.getElementById('sup-fecha').value
   const cantidad=parseFloat(document.getElementById('sup-cantidad').value)||0
+  const prod=document.getElementById('sup-producto').value
   if(!fecha||cantidad<=0){alert('Completá fecha y cantidad.');return}
-  DB.suplementos.push({id:uid(),fecha,
-    producto:document.getElementById('sup-producto').value,
-    cantidad,
+
+  const rolloTipo=prod==='rollo'?document.getElementById('sup-rollo-tipo').value:''
+  const otroNombre=prod==='otro'?document.getElementById('sup-otro-nombre').value.trim():''
+
+  // Check stock for rollos
+  if(prod==='rollo'){
+    const stock=getStockInsumo('rollo',rolloTipo)
+    if(stock<cantidad){
+      if(!confirm(`Stock insuficiente: tenés ${stock} rollos de ${ROLLO_TIPO_LABEL[rolloTipo]} pero querés usar ${cantidad}. ¿Continuar igual?`))return
+    }
+  }
+
+  DB.suplementos.push({id:uid(),fecha,producto:prod,rolloTipo,otroNombre,cantidad,
     modalidad:document.getElementById('sup-modalidad').value,
     loteId:document.getElementById('sup-lote').value,
     tropa:document.getElementById('sup-tropa').value.trim(),
-    costo:parseFloat(document.getElementById('sup-costo').value)||0,
-    operario:document.getElementById('sup-operario').value.trim(),
     obs:document.getElementById('sup-obs').value.trim(),
     uid:currentUser.id,uname:currentUser.name
   })
   dbSave(DB);closeM('m-suplem')
-  clr('sup-cantidad','sup-tropa','sup-costo','sup-obs','sup-operario')
-  logActivity('Suplementación',`${SUPLEM_PROD_LABEL[document.getElementById('sup-producto')?.value||'']} — ${cantidad}`)
+  clr('sup-cantidad','sup-tropa','sup-obs')
+  const prodLabel=prod==='rollo'?`Rollo ${ROLLO_TIPO_LABEL[rolloTipo]}`:prod==='otro'?otroNombre:SUPLEM_PROD_LABEL[prod]
+  logActivity('Suplementación',`${prodLabel} — ${cantidad} ${SUPLEM_PROD_UNIT[prod]||''}`)
   render();toast('Suministro registrado','🌽')
 }
 
 function delSuplem(id){
-  if(!confirm('¿Eliminar este registro?'))return
+  if(!confirm('¿Eliminar este registro? El stock se restaurará.'))return
   DB.suplementos=DB.suplementos.filter(s=>s.id!==id);dbSave(DB);render()
 }
 
 function renderSuplem(){
   if(!DB.suplementos)DB.suplementos=[]
+  if(!DB.insumosIngresos)DB.insumosIngresos=[]
+  if(!DB.insumosConfig)DB.insumosConfig={maiz:{minimo:500},nucleo:{minimo:100},otros:{}}
   const loteMap=Object.fromEntries(DB.lotes.map(l=>[l.id,l.nombre]))
-  const prodF=(document.getElementById('suplem-f-prod')||{value:''}).value
-  const modF=(document.getElementById('suplem-f-mod')||{value:''}).value
 
-  // Stats
-  const el=document.getElementById('suplem-stats');if(!el)return
+  // ── Stock panel ───────────────────────────────
+  const stockPanel=document.getElementById('insumo-stock-panel');if(!stockPanel)return
+
+  const stockMaiz=getStockInsumo('maiz')
+  const stockNucleo=getStockInsumo('nucleo')
+  const minMaiz=DB.insumosConfig.maiz?.minimo||0
+  const minNucleo=DB.insumosConfig.nucleo?.minimo||0
+
+  // Collect otros insumos
+  const otrosSet=new Set()
+  DB.insumosIngresos.filter(i=>i.tipo==='otro').forEach(i=>otrosSet.add(i.nombre||''))
+  DB.suplementos.filter(s=>s.producto==='otro'&&s.otroNombre).forEach(s=>otrosSet.add(s.otroNombre))
+
+  // Rollos stock per type
+  const rolloTipos=['pastura','verdeo','avena','rye grass','otro']
+  const rollosStockArr=rolloTipos.map(t=>({tipo:t,stock:getStockInsumo('rollo',t)})).filter(r=>r.stock!==0||(DB.rollosProduccion||[]).some(r2=>r2.tipo===r.tipo))
+
+  const stCard=(label,stock,min,unit,color)=>{
+    const bajo=min>0&&stock<min
+    const c=bajo?'var(--rust)':stock<=0?'var(--hide)':'var(--green)'
+    return`<div style="background:${bajo?'rgba(184,60,42,.06)':'var(--parch)'};border:1.5px solid ${bajo?'var(--rust)':'var(--wheat)'};border-radius:9px;padding:12px 16px;min-width:140px">
+      <div style="font-size:11px;font-weight:600;color:var(--hide);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">${label}</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:${c};line-height:1">${stock}</div>
+      <div style="font-size:11px;color:var(--hide)">${unit}${min>0?' · mín: '+min+' '+unit:''}</div>
+      ${bajo?'<div style="font-size:10px;color:var(--rust);font-weight:600;margin-top:3px">⚠️ Stock bajo</div>':''}
+    </div>`
+  }
+
+  let html=`<div style="display:flex;gap:12px;flex-wrap:wrap">`
+  html+=stCard('Maíz',stockMaiz,minMaiz,'kg','var(--gold)')
+  html+=stCard('Núcleo',stockNucleo,minNucleo,'kg','var(--sky)')
+  rollosStockArr.forEach(r=>{
+    html+=stCard(`Rollo ${ROLLO_TIPO_LABEL[r.tipo]}`,r.stock,0,'rollos','var(--green)')
+  })
+  otrosSet.forEach(nombre=>{
+    const s=getStockInsumo('otro',nombre)
+    html+=stCard(nombre,s,0,'kg','var(--bark)')
+  })
+  html+='</div>'
+  if(![stockMaiz,stockNucleo,...rollosStockArr.map(r=>r.stock)].some(s=>s!==0)&&!otrosSet.size){
+    html='<div style="color:var(--hide);font-size:12px">Sin stock registrado — usá "📥 Ingreso de Insumos" para cargar el stock inicial.</div>'
+  }
+  stockPanel.innerHTML=html
+
+  // ── Alertas ───────────────────────────────────
+  const alertasEl=document.getElementById('insumo-alertas');if(alertasEl){
+    const alertas=[]
+    if(minMaiz>0&&stockMaiz<minMaiz)alertas.push(`Maíz: ${stockMaiz}kg (mín ${minMaiz}kg)`)
+    if(minNucleo>0&&stockNucleo<minNucleo)alertas.push(`Núcleo: ${stockNucleo}kg (mín ${minNucleo}kg)`)
+    alertasEl.innerHTML=alertas.length
+      ?`<div style="background:rgba(184,60,42,.1);border:2px solid var(--rust);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px"><span style="font-size:20px">⚠️</span><div><strong style="color:var(--rust)">Stock bajo:</strong> <span style="font-size:13px">${alertas.join(' · ')}</span></div></div>`
+      :''
+  }
+
+  // ── Stats ─────────────────────────────────────
+  const statsEl=document.getElementById('suplem-stats');if(!statsEl)return
   const totalKg=DB.suplementos.filter(s=>s.producto!=='rollo').reduce((a,s)=>a+s.cantidad,0)
   const totalRollos=DB.suplementos.filter(s=>s.producto==='rollo').reduce((a,s)=>a+s.cantidad,0)
-  const costoTotal=DB.suplementos.reduce((a,s)=>a+(s.costo||0),0)
   const eventos=DB.suplementos.length
-  el.innerHTML=`
-    <div class="sc"><span class="sc-icon">🌽</span><div class="sc-label">Total suministrado</div><div class="sc-value g">${totalKg.toFixed(0)}</div><div class="sc-sub">kg (maíz + núcleo)</div></div>
-    <div class="sc"><span class="sc-icon">🌾</span><div class="sc-label">Rollos usados</div><div class="sc-value o">${totalRollos.toFixed(0)}</div><div class="sc-sub">rollos suministrados</div></div>
-    <div class="sc"><span class="sc-icon">💰</span><div class="sc-label">Costo total</div><div class="sc-value" style="font-size:18px">${$m(costoTotal)}</div></div>
+  statsEl.innerHTML=`
+    <div class="sc"><span class="sc-icon">🌽</span><div class="sc-label">Total suministrado</div><div class="sc-value g">${totalKg.toFixed(0)}</div><div class="sc-sub">kg acumulados</div></div>
+    <div class="sc"><span class="sc-icon">🌾</span><div class="sc-label">Rollos usados</div><div class="sc-value o">${totalRollos}</div><div class="sc-sub">rollos suministrados</div></div>
     <div class="sc"><span class="sc-icon">📋</span><div class="sc-label">Eventos</div><div class="sc-value">${eventos}</div></div>`
 
-  // Gráfico por producto
+  // ── Gráficos ──────────────────────────────────
   const byProd={}
-  DB.suplementos.forEach(s=>{byProd[s.producto]=(byProd[s.producto]||0)+s.cantidad})
-  const chartProd=document.getElementById('suplem-chart-prod');if(!chartProd)return
-  const maxP=Math.max(...Object.values(byProd),1)
-  chartProd.innerHTML=Object.entries(byProd).map(([k,v])=>`
-    <div class="bar-row">
-      <div class="bar-label"><span>${SUPLEM_PROD_LABEL[k]||k}</span><span style="color:var(--gold)">${v.toFixed(0)} ${SUPLEM_PROD_UNIT[k]||''}</span></div>
-      <div class="bar-track"><div class="bar-fill" style="width:${(v/maxP*100).toFixed(0)}%;background:var(--gold)"></div></div>
-    </div>`).join('') || '<div style="color:var(--hide);font-size:12px">Sin datos</div>'
-
-  // Gráfico por modalidad
+  DB.suplementos.forEach(s=>{
+    const k=s.producto==='rollo'?(s.rolloTipo?'rollo_'+s.rolloTipo:'rollo'):s.producto==='otro'?(s.otroNombre||'otro'):s.producto
+    const label=s.producto==='rollo'?`Rollo ${ROLLO_TIPO_LABEL[s.rolloTipo]||''}`:s.producto==='otro'?(s.otroNombre||'Otro'):SUPLEM_PROD_LABEL[s.producto]||s.producto
+    if(!byProd[k])byProd[k]={label,v:0,unit:SUPLEM_PROD_UNIT[s.producto]||''}
+    byProd[k].v+=s.cantidad
+  })
+  const chartProd=document.getElementById('suplem-chart-prod')
+  if(chartProd){
+    const maxP=Math.max(...Object.values(byProd).map(x=>x.v),1)
+    chartProd.innerHTML=Object.values(byProd).sort((a,b)=>b.v-a.v).map(({label,v,unit})=>`
+      <div class="bar-row">
+        <div class="bar-label"><span>${label}</span><span style="color:var(--gold)">${v.toFixed(0)} ${unit}</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(v/maxP*100).toFixed(0)}%;background:var(--gold)"></div></div>
+      </div>`).join('') || '<div style="color:var(--hide);font-size:12px">Sin datos</div>'
+  }
   const byMod={}
   DB.suplementos.forEach(s=>{byMod[s.modalidad]=(byMod[s.modalidad]||0)+1})
-  const chartMod=document.getElementById('suplem-chart-mod');if(!chartMod)return
-  const maxM=Math.max(...Object.values(byMod),1)
-  chartMod.innerHTML=Object.entries(byMod).map(([k,v])=>`
-    <div class="bar-row">
-      <div class="bar-label"><span>${SUPLEM_MOD_LABEL[k]||k}</span><span style="color:var(--sky)">${v} eventos</span></div>
-      <div class="bar-track"><div class="bar-fill" style="width:${(v/maxM*100).toFixed(0)}%;background:var(--sky)"></div></div>
-    </div>`).join('') || '<div style="color:var(--hide);font-size:12px">Sin datos</div>'
+  const chartMod=document.getElementById('suplem-chart-mod')
+  if(chartMod){
+    const maxM=Math.max(...Object.values(byMod),1)
+    chartMod.innerHTML=Object.entries(byMod).map(([k,v])=>`
+      <div class="bar-row">
+        <div class="bar-label"><span>${SUPLEM_MOD_LABEL[k]||k}</span><span style="color:var(--sky)">${v} eventos</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(v/maxM*100).toFixed(0)}%;background:var(--sky)"></div></div>
+      </div>`).join('') || '<div style="color:var(--hide);font-size:12px">Sin datos</div>'
+  }
 
-  // Tabla
+  // ── Tabla ─────────────────────────────────────
+  const prodF=(document.getElementById('suplem-f-prod')||{value:''}).value
+  const modF=(document.getElementById('suplem-f-mod')||{value:''}).value
   let data=[...DB.suplementos].sort((a,b)=>b.fecha.localeCompare(a.fecha))
   if(prodF)data=data.filter(s=>s.producto===prodF)
   if(modF)data=data.filter(s=>s.modalidad===modF)
   const tb=document.getElementById('suplem-tbody');if(!tb)return
-  tb.innerHTML=data.length?data.map(s=>`
-    <tr>
+  tb.innerHTML=data.length?data.map(s=>{
+    const prodLabel=s.producto==='rollo'?`Rollo ${ROLLO_TIPO_LABEL[s.rolloTipo]||''}`:s.producto==='otro'?(s.otroNombre||'Otro'):SUPLEM_PROD_LABEL[s.producto]||s.producto
+    const unit=SUPLEM_PROD_UNIT[s.producto]||''
+    return`<tr>
       <td>${$fd(s.fecha)}</td>
-      <td><span class="badge ${SUPLEM_PROD_BADGE[s.producto]||'b-bark'}">${SUPLEM_PROD_LABEL[s.producto]||s.producto}</span></td>
-      <td style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700">${s.cantidad} <span style="font-size:12px;color:var(--hide)">${SUPLEM_PROD_UNIT[s.producto]||''}</span></td>
+      <td><span class="badge ${SUPLEM_PROD_BADGE[s.producto]||'b-bark'}">${prodLabel}</span></td>
+      <td style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700">${s.cantidad} <span style="font-size:11px;color:var(--hide)">${unit}</span></td>
       <td><span class="badge b-bark">${SUPLEM_MOD_LABEL[s.modalidad]||s.modalidad}</span></td>
       <td>${s.loteId?loteMap[s.loteId]||'-':'-'}</td>
       <td style="font-size:12px;color:var(--hide)">${s.tropa||'-'}</td>
-      <td>${s.costo>0?$m(s.costo):'-'}</td>
       <td style="font-size:11px;color:var(--hide)">${s.obs||'-'}</td>
       <td><button class="icon-btn" onclick="delSuplem('${s.id}')">🗑</button></td>
-    </tr>`).join('')
-  :'<tr class="empty-row"><td colspan="9">Sin suministros registrados</td></tr>'
+    </tr>`}).join('')
+  :'<tr class="empty-row"><td colspan="8">Sin suministros registrados</td></tr>'
 }
 
 // ══════════════════════════════════════════════════
